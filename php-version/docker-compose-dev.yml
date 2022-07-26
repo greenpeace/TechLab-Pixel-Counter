@@ -1,0 +1,58 @@
+# ./docker-compose.yml
+version: "3.7"
+
+x-defaults:
+  network: &network
+    networks:
+      - net
+
+services:
+  php:
+    image: cmspixel
+    depends_on:
+      - "db"
+    ports:
+      - "8383:80"
+    # The access to a “volume” that we define in the docker-compose.yml file which maps the the local folder. 
+    # When we do this, we map a folder on the host filesystem (outside of the container context) to inside of the running containers. 
+    # Developers may wish to set their projects up like this because it allows them to edit the file outside of the container,
+    # yet have the container serve the updated PHP code out as soon as changes are saved.
+    volumes:
+      - .:/var/www/html/
+      - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+      - ./docker/php/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
+    <<: *network
+
+  db:
+    platform: linux/amd64
+    image: mysql/mysql-server:8.0.23
+    container_name: mysql-container-pixel
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=sqlpixels
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+    volumes:
+       - ./localhost.sql:/docker-entrypoint-initdb.d/localhost.sql
+       - ./privileges.sql:/docker-entrypoint-initdb.d/privileges.sql
+    <<: *network
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    depends_on:
+      - "db"
+    restart: always
+    environment:
+      - PMA_ARBITRARY=1
+    ports:
+    - "8889:80"
+    <<: *network
+
+networks:
+  net:
+
+volumes:
+  data:
+    external: true
