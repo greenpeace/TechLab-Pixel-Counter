@@ -1,6 +1,6 @@
 # TechLab Tracking Pixel
 
-Php version created by GPES - 1. Osvalo's pixel code. It basically counts a pixel on the thank you page. 
+<a href="https://github.com/greenpeace/gpes-multi-organizations-counter-api">Php version created by GPES</a> - 1. Osvalo's pixel code. It basically counts a pixel on the thank you page. 
 
 Pros: Easy to implement across different digital marketing platforms.
 
