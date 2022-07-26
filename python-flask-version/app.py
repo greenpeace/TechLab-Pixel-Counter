@@ -3,6 +3,7 @@
 
 import os
 from flask import Flask, request, jsonify, render_template
+from google.cloud.firestore import Increment
 from firebase_admin import credentials, firestore, initialize_app
 import firebase_admin
 
@@ -79,6 +80,16 @@ def update():
         return jsonify({"success": True}), 200
     except Exception as e:
         return f"An Error Occured: {e}"
+    
+@app.route('/counter', methods=['POST', 'PUT'])
+def counter():
+    try:
+        id = request.json['id']
+        counter_ref.document(id).update({u'count': Increment(1)})
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        return f"An Error Occured: {e}"
+
     
 @app.route('/delete', methods=['GET', 'DELETE'])
 def delete():
