@@ -12,3 +12,8 @@ Pros: More accurate
 Cons: Not all digital platforms are supported, including our new global platform Hubspot so I need to do a lot of manual work. 
 
 And a new vrsion create as a microservice using the Python Flask model
+
+# Debug Locally
+
+export GOOGLE_APPLICATION_CREDENTIALS="/Users/torbjornzetterlund/Documents/service_accounts/SocialClimateTech-317e62ec7c0f.json"
+
