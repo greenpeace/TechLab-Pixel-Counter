@@ -1,19 +1,26 @@
 # TechLab Tracking Pixel
 
-<a href="https://github.com/greenpeace/gpes-multi-organizations-counter-api">Php version created by GPES</a> - 1. Osvalo's pixel code. It basically counts a pixel on the thank you page. 
+Creating a tracking pixel API in Python with Flask, to add a pixel to the end of the page.
+
+The work has been based on two different developed approaches
+
+<a href="https://github.com/greenpeace/gpes-multi-organizations-counter-api">Php version created by GPES</a> - Pixel code. It basically counts a pixel on the thank you page. 
 
 Pros: Easy to implement across different digital marketing platforms.
-
 Cons: Not too accurate. If somebody signs the petition twice, the email will be counted twice. 
 
 
-GPUK Code. This is the <a href="https://act.greenpeace.org/page/49013/petition/1">counter</a> <a href="https://docs.google.com/document/d/1mXOSE4hpCNAhtNEJtkKpgsJ5lbFNVgU6sQnstAVemkk/edit#heading=h.1sym80nhaqvs">(see instructions)</a> that we are currently using to collate all unique signatures across different NROs working on plastics. This includes every single petition that NROs have launched  since the organisation started to campaign on plastics 5 years ago. As you can see some digital marketing platforms are not included in Jack's code so NROs that are on these platforms need to report their signatures every two months or so and we add them manually. The other NROs had to create dynamic lists/ IDs and include all of their plastics petitions. Their numbers get added to the counter automatically. You can see who is reporting manually and who has generated a list/ ID <a href="https://docs.google.com/spreadsheets/d/1jFyzV4Q34GLYZAu121uj1FZ4MoU6IP8XXkaKA9YTKQw/edit#gid=0">here</a> (look at the different tabs). 
+GPUK Code. This is the <a href="https://act.greenpeace.org/page/49013/petition/1">counter</a> collate all unique signatures across different platforms. 
 Pros: More accurate
-Cons: Not all digital platforms are supported, including our new global platform Hubspot so I need to do a lot of manual work. 
+Cons: Not all digital platforms are supported. 
 
-And a new vrsion create as a microservice using the Python Flask model
+# Approaches
+In this repostory we have two approaches, first the one based on the GPES work, and the second one based on a micro service approach using Google Cloud Run to run the Python Flask app.
 
-# Debug Locally
+# Included in the repository
+The work done by GPES that we have included in the repository, has got an Docker upgrade that we include the file for
 
-export GOOGLE_APPLICATION_CREDENTIALS="/Users/torbjornzetterlund/Documents/service_accounts/SocialClimateTech-317e62ec7c0f.json"
+# New work
+The new work is based on Python Flask web platform, and we have created an  API Server with Python Flask-RESTful.
 
+The Python flask approach includes Docker files for deployment to Google Cloud Run.
