@@ -5,49 +5,37 @@
     <meta charset="utf-8" />
     <title>Signups</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Rubik:300,400,500,700,900|Work+Sans:400,500,600,700" 8/>
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/page.css') }}">
 </head>
-
-<body>
-
-    <!-- INICIO DEL CONTADOR -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/odometer@0.4.8/themes/odometer-theme-default.min.css" />
-    <style>
-        .odometer.odometer-auto-theme,
-        .odometer {
-            font-size: 25px;
-            font-family: "Rubik", sans-serif;
-            font-weight: 600;
-        }
-        .odometer.odometer-auto-theme .odometer-digit,
-        .odometer .odometer-digit {
-            color: #444;
-            border: 1px solid #ddd;
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/odometer@0.4.8/odometer.min.js" defer></script>
-    <div id="odometer2container"><span id="odometer2" class="odometer2"></span> signups</div>
-    <script>
-        /* jshint browser: true, esversion: 6 */
-        /* global Odometer, odometer, jQuery, analytics, console */
-        document.addEventListener("DOMContentLoaded", function() {
-            jQuery.ajax({
-                url: "counter/"
-            }).done(function( data ) {
-                const counterValue = Number(data.signups);
-                const el = document.querySelector('.odometer2');
-                const odometer = new Odometer({
-                    el: el,
-                    format: '.ddd.ddd',
-                    value: counterValue - Math.round( counterValue / 10 ),
-                    duration: 2000,
-                });
-                odometer.update(counterValue);
-            });
-        });
-    </script>
-    <!-- FIN DEL CONTADOR -->
-
-</body>
-
+    <body>
+        <header>
+            <div class="container">
+              <h1 class="logo">Pixel Counter</h1>
+              <strong><nav>
+                <ul class="menu">
+                    <li><a href="{{ url_for('main') }}">Home</a></li>
+                    <li><a href="{{ url_for('read') }}">List</a></li>
+                </ul>
+              </nav></strong>
+            </div>
+          </header>
+        <div class="container">
+            <div id="banner">
+                <h1>Get your NROs Signups</h1>
+            </div>
+            <form action="/signups" method="post" target="dummyframe">
+                <input type="text" name="id"></input>
+                <br>
+                <br>
+                <input type="submit" value="GET Signups"></input>
+            </form>
+            <div class="card" id="output">
+                <div class="card-body">
+                    {{output}}
+                </div>
+            </div>
+        </div>
+        <iframe src="http://127.0.0.1:8080/count?id=GPNO" width="200" height="40" frameborder=0 style="overflow:hidden;" scrolling="no" /></iframe>
+    </body>
 </html>

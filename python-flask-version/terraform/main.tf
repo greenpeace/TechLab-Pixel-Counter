@@ -1,12 +1,17 @@
-# Filename: main.tf
 # Configure GCP project
 provider "google" {
   project = "social-climate-tech"
 }
+
+resource "google_project_service" "cloud_run" {
+  provider                   = google
+  service                    = "run.googleapis.com"
+  disable_dependent_services = true
+}
 # Deploy image to Cloud Run
 resource "google_cloud_run_service" "pixelcounter" {
   name     = "pixelcounter"
-  location = "europe-north1-a"
+  location = "europe-north1"
   template {
     spec {
       containers {

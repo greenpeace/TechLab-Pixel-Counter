@@ -29,25 +29,23 @@ def page_not_found(e):
 app = Flask(__name__)
 
 # initialize firebase sdk
-cred = credentials.ApplicationDefault()
-firebase_admin.initialize_app(cred, {
-    'projectId': project_id,
-})
+cred = credentials.Certificate('key.json')
+initialize_app(cred)
 
+# Initialize Firestore DB
+#cred = credentials.ApplicationDefault()
+#firebase_admin.initialize_app(cred, {
+#    'projectId': project_id,
+#})
+# Intialize Firebase Client for DB
 db = firestore.client()
 counter_ref = db.collection(u'counters')
-#counter_ref = db.collection(u'counters').document(u'pixelcounter')
-#doc = counter_ref.get()
 
 app.register_error_handler(404, page_not_found)
 
-counter = 1 #or whatever you want to start with
-
 @app.route('/')
 def main():
-    global counter
-    counter += 1
-    return str(counter)
+    return render_template('index.html', **locals())
 
 @app.route('/add', methods=['POST'])
 def create():
@@ -68,6 +66,7 @@ def read():
             return jsonify(u'{}'.format(counter.to_dict()['count'])), 200
         else:
             all_counters = [doc.to_dict() for doc in counter_ref.stream()]
+            return render_template('index.html', output=jsonify(all_counters))
             return jsonify(all_counters), 200
     except Exception as e:
         return f"An Error Occured: {e}"
@@ -90,6 +89,33 @@ def counter():
     except Exception as e:
         return f"An Error Occured: {e}"
 
+##
+# The count route used for pixel image to make a count using a GET request
+##
+@app.route('/count', methods=['GET'])
+def count():
+    try:
+        id = request.args.get('id')  
+        counter_ref.document(id).update({u'count': Increment(1)})
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        return f"An Error Occured: {e}"
+    
+##
+# The an NROs signups from the pixel image
+##
+@app.route('/signups', methods=['POST', 'PUT'])
+def signups():    
+    try:
+        if request.method == "POST":
+            counter_id = request.form['id']
+            counter = counter_ref.document(counter_id).get()
+            output = f"{ counter.to_dict()['count'] }"
+            return render_template('index.html', output=output)
+        return render_template('index.html', output="Not NGO name has been given")
+    except Exception as e:
+        return render_template('index.html', output="An Error Occured: {e}")
+        return f"An Error Occured: {e}" 
     
 @app.route('/delete', methods=['GET', 'DELETE'])
 def delete():
@@ -101,7 +127,7 @@ def delete():
     except Exception as e:
         return f"An Error Occured: {e}"
 
-port=9988    
-#port = int(os.environ.get('PORT', 8080))
+#port=8080
+port = int(os.environ.get('PORT', 8080))
 if __name__ == '__main__':
     app.run(threaded=True, host='0.0.0.0', port=port)
