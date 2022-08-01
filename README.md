@@ -24,3 +24,27 @@ The work done by GPES that we have included in the repository, has got an Docker
 The new work is based on Python Flask web platform, and we have created an  API Server with Python Flask-RESTful.
 
 The Python flask approach includes Docker files for deployment to Google Cloud Run.
+
+
+For a user account:
+
+gcloud projects add-iam-policy-binding social-climate-tech \
+--member='user:tzetter@socialclimate.tech' \
+--role='roles/iam.serviceAccountUser'
+
+For a service account:
+
+gcloud projects add-iam-policy-binding social-climate-tech \
+--member='serviceAccount:newsapi@social-climate-tech.iam.gserviceaccount.com' \
+--role='roles/iam.serviceAccountUser'
+
+# Authentication
+https://cloud.google.com/sdk/gcloud/reference/auth/configure-docker
+```
+gcloud auth configure-docker gcr.io
+```
+
+# Troubleshoot Docker Image
+docker run -it --rm --entrypoint sh <name-of-image>
+
+gcr.io/social-climate-tech/pixelcounter

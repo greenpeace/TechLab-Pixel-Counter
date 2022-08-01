@@ -1,17 +1,12 @@
 # Required Imports
 # app.py
-
 import os
 from flask import Flask, request, jsonify, render_template
 from google.cloud.firestore import Increment
 from firebase_admin import credentials, firestore, initialize_app
 import firebase_admin
 
-# Install Google Libraries
-from google.cloud import secretmanager
-
-# Setup the Secret manager Client
-client = secretmanager.SecretManagerServiceClient()
+#client = secretmanager.SecretManagerServiceClient()
 # Get the sites environment credentials
 #project_id = os.environ["PROJECT_NAME"]
 project_id = 'social-climate-tech'
@@ -19,17 +14,11 @@ project_id = 'social-climate-tech'
 def page_not_found(e):
   return render_template('404.html'), 404
 
-# Get the secret for Slackkey
-#secret_name = "newsAPISLackKey"
-#resource_name = f"projects/{project_id}/secrets/{secret_name}/versions/latest"
-#response = client.access_secret_version(request={"name": resource_name})
-#slackurl = response.payload.data.decode('UTF-8')
-
 # Initialize Flask App
 app = Flask(__name__)
 
 # initialize firebase sdk
-cred = credentials.Certificate('key.json')
+cred = credentials.Certificate('./key.json')
 initialize_app(cred)
 
 # Initialize Firestore DB
@@ -127,7 +116,8 @@ def delete():
     except Exception as e:
         return f"An Error Occured: {e}"
 
-#port=8080
 port = int(os.environ.get('PORT', 8080))
 if __name__ == '__main__':
-    app.run(threaded=True, host='0.0.0.0', port=port)
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=port)
+#    app.run(threaded=True, host='0.0.0.0', port=port)
