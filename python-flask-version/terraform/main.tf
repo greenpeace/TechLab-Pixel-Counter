@@ -1,3 +1,12 @@
+# main.tf
+terraform {
+  required_version = ">= 0.14"
+
+  required_providers {
+    # Cloud Run support was added on 3.3.0
+    google = ">= 3.3"
+  }
+}
 # Configure GCP project
 provider "google" {
   credentials = file("../key.json")
@@ -27,7 +36,6 @@ resource "google_cloud_run_service" "app" {
   template {
     spec {
       containers {
-        #image = data.google_container_registry_image.app.image_url
         image = "eu.gcr.io/social-climate-tech/pixelcount"
         ports {
           container_port = 8080

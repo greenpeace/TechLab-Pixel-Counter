@@ -53,10 +53,20 @@
         <div class="row">
             <div class="card" id="output">
                 <div class="card-body">
-                    {% for e in output %}
-                      {{e}}
+                    {% if output %}
+                    {% for ngo in output %}
+                    <div class="row featurette">
+                        <div class="col-md-7">
+                            <p>
+                              {{ngo.id}} - {{ngo.count}}
+                            </p>
+                        </div>
+                    </div>
+                    <hr class="featurette-divider">
                     {% endfor %}
-                  </div>
+                    {% endif %}
+
+                </div>
             </div>
         </div>
         <hr>

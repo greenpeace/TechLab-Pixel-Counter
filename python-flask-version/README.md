@@ -100,14 +100,14 @@ gcloud auth configure-docker europe-docker.pkg.dev
 
 Europe Docker is the Docker registry that is used for the Docker image.
 ```
-$ docker build -t eu.gcr.io/social-climate-tech/pixelcounter .
-$ docker push eu.gcr.io/social-climate-tech/pixelcounter
+$ docker build -t eu.gcr.io/social-climate-tech/pixelcount .
+$ docker push eu.gcr.io/social-climate-tech/pixelcount
 ```
 
 US
 ```
-$ docker build -t gcr.io/social-climate-tech/pixelcounter .
-$ docker push gcr.io/social-climate-tech/pixelcounter
+$ docker build -t gcr.io/social-climate-tech/pixelcount .
+$ docker push gcr.io/social-climate-tech/pixelcount
 ```
 
 ## Deploy Yaml database
