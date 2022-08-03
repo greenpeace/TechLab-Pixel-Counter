@@ -2,12 +2,10 @@
 # app.py
 import os
 import base64
-import json
 import werkzeug
 from flask import Flask, request, jsonify, render_template, abort
 from google.cloud.firestore import Increment
 from firebase_admin import credentials, firestore, initialize_app
-
 
 #client = secretmanager.SecretManagerServiceClient()
 # Get the sites environment credentials
@@ -16,6 +14,9 @@ project_id = 'social-climate-tech'
 
 def page_not_found(e):
   return render_template('404.html'), 404
+
+def internal_server_error(e):
+  return render_template('500.html'), 500
 
 # Initialize Flask App
 app = Flask(__name__)
@@ -31,10 +32,14 @@ initialize_app(cred)
 #})
 # Intialize Firebase Client for DB
 db = firestore.client()
+# Counters firestore collection
 counter_ref = db.collection(u'counters')
+# Donation firestore collection
+donation_ref = db.collection(u'donation')
 
+# Register Error Handlers
 app.register_error_handler(404, page_not_found)
-
+app.register_error_handler(500, internal_server_error)
 #
 # API Route Default displays a webpage
 #
@@ -139,7 +144,43 @@ def signups():
     except Exception as e:
         return render_template('index.html', output="An Error Occured: {e}")
         #return f"An Error Occured: {e}" 
-    
+
+
+##
+# The API endpoint is an example on how you can submit a form acapture the data and submit it to the database
+# API endpoint /donation
+# Post request with json form data{"id":"GP Canada","count", 0}
+##
+@app.route('/donationform', methods=['GET'])
+def donationform():
+    return render_template('donation.html',**locals())
+
+##
+# The API endpoint is an example on how you can submit a form acapture the data and submit it to the database
+# API endpoint /donation
+# Post request with json form data{"id":"GP Canada","count", 0}
+##
+@app.route('/donation', methods=['POST', 'PUT'])
+def donation():    
+    try:
+        donation_ref.document().set(request.form)
+        return render_template('donation.html',**locals())
+        #return jsonify({"success": True}), 200
+    except Exception as e:
+        return render_template('donation.html', output="An Error Occured: {e}")
+        #return f"An Error Occured: {e}" 
+        
+#
+# API Route list all or a speific counter by ID - requires json file body with id and count
+#
+@app.route('/donationlist', methods=['GET'])
+def donationlist():
+    try:
+        donation = [doc.to_dict() for doc in donation_ref.stream()]
+        return render_template('donationlist.html', output=donation), 200
+    except Exception as e:
+        return f"An Error Occured: {e}"
+
 #
 # API Route Delete a counter by ID /delete?id=<id>
 # API Enfpoint /delete?id=<id>
@@ -174,4 +215,3 @@ port = int(os.environ.get('PORT', 8080))
 if __name__ == '__main__':
     from waitress import serve
     serve(app, host="0.0.0.0", port=port)
-

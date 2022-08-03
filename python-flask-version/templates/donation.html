@@ -43,7 +43,10 @@
       <div class="jumbotron">
         <div class="container">
             <div id="banner">
-                <h1>List of all counters</h1>
+                <p>From the beaches of Southeast Asia to the remote Antarctic, plastic pollution is everywhere. It starts polluting the moment it's created, impacting our oceans, our climate and the health of our communities. Microplastics pollution has now even been found in the air we breathe and the food we eat. We need a solution that matches the scale of the problem.
+                    <br><br>
+                    A global treaty on plastics is that solution. We are one step closer in the UN process to achieving it. Negotiations will start later this year, with the goal of completing the process by the end of 2024.
+                </p>
             </div>
         </div>
       </div>
@@ -51,34 +54,21 @@
     <div class="container">
         <!-- Example row of columns -->
         <div class="row">
-            <div class="card" id="output">
-                <div class="card-body">
-                      <table class="table table-striped">
-                        <thead>
-                          <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">NRO</th>
-                            <th scope="col">Counter</th>
-                            <th scope="col">URL</th>
-                            <th scope="col">Contact point</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {% if output %}
-                            {% for ngo in output %}
-                            <tr>
-                              <th scope="row"></th>
-                              <td>{{ngo.id}}</td>
-                              <td>{{ngo.count}}</td>
-                              <td>{{ngo.url}}</td>
-                              <td>{{ngo.contactpoint}}</td>  
-                            </tr>
-                            {% endfor %}
-                          {% endif %}      
-                        </tbody>
-                      </table>
-                    </div>
-                </div>
+            <form action="/donation" method="post">
+                <input type="hidden" name="id" value="GPNO"></input>
+                <hr>
+                <label for="email">Email</label>  
+                <input type="text" name="email"></input>
+                <hr>
+                <label for="firstname">First Name</label>
+                <input type="text" name="firstname"></input>
+                <hr>
+                <label for="lastname">Last Name</label>
+                <input type="text" name="lastname"></input>
+                <br>
+                <br>
+                <input type="submit" value="Signup"></input>
+            </form>
             </div>
         </div>
         <hr>
@@ -91,3 +81,4 @@
     </footer>
   </body>
 </html>
+

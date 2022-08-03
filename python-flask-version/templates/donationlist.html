@@ -38,17 +38,15 @@
     </nav>
 
     <main role="main">
-
       <!-- Main jumbotron for a primary marketing message or call to action -->
       <div class="jumbotron">
         <div class="container">
             <div id="banner">
-                <h1>List of all counters</h1>
+                <h1>List of Signup</h1>
             </div>
         </div>
       </div>
-
-    <div class="container">
+      <div class="container">
         <!-- Example row of columns -->
         <div class="row">
             <div class="card" id="output">
@@ -58,9 +56,9 @@
                           <tr>
                             <th scope="col">#</th>
                             <th scope="col">NRO</th>
-                            <th scope="col">Counter</th>
-                            <th scope="col">URL</th>
-                            <th scope="col">Contact point</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">First Name</th>
+                            <th scope="col">Last Name</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -69,9 +67,9 @@
                             <tr>
                               <th scope="row"></th>
                               <td>{{ngo.id}}</td>
-                              <td>{{ngo.count}}</td>
-                              <td>{{ngo.url}}</td>
-                              <td>{{ngo.contactpoint}}</td>  
+                              <td>{{ngo.email}}</td>
+                              <td>{{ngo.firstname}}</td>
+                              <td>{{ngo.lastname}}</td>  
                             </tr>
                             {% endfor %}
                           {% endif %}      

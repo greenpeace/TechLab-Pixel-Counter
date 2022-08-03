@@ -4,9 +4,5 @@ variable "gcp_region" {
 }
 variable "image_name" {
   type = string
-  default = "pixelcounter"
-}
-variable "source_repo_name" {
-  type = string
-  default = "pixelcounter"
+  default = "pixelcount"
 }

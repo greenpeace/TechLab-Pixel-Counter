@@ -2,3 +2,5 @@ flask
 firebase_admin
 google-api-python-client
 google-cloud-secret-manager
+werkzeug
+waitress
