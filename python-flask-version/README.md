@@ -166,8 +166,15 @@ We are developing on the Mac ARM architecture but we want to create a x86 compat
 docker buildx build \
 --platform linux/amd64 \
 --push \
--t eu.gcr.io/<project-id>/pixelcount .
+-t eu.gcr.io/<project-id>/pixelcount:v2 .
 ```
+
+As you can see I am tagging for each new version with adding:v<number> like this pixelcount:v2
+
+This allows me to modifying the image without having to rebuild it.
+
+You would need to update the terraform main/tf file so the tag matches.
+
 
 Option B: set DOCKER_DEFAULT_PLATFORM
 The DOCKER_DEFAULT_PLATFORM environment variable permits to set the default platform for the commands that take the --platform flag.

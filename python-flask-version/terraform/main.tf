@@ -10,8 +10,8 @@ terraform {
 # Configure GCP project
 provider "google" {
   credentials = file("../key.json")
-  project     = "social-climate-tech"
-  region      = "europe-north1"
+  project     = var.project_id
+  region      = var.gcp_region
 }
 
 resource "google_project_service" "cloud_run" {
@@ -36,7 +36,7 @@ resource "google_cloud_run_service" "pixelcount" {
   template {
     spec {
       containers {
-        image = "eu.gcr.io/social-climate-tech/pixelcount"
+        image = "eu.gcr.io/social-climate-tech/pixelcount:v2"
         ports {
           container_port = 8080
         }

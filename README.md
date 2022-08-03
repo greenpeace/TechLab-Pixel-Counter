@@ -25,7 +25,6 @@ The new work is based on Python Flask web platform, and we have created an  API 
 
 The Python flask approach includes Docker files for deployment to Google Cloud Run.
 
-
 For a user account:
 
 gcloud projects add-iam-policy-binding social-climate-tech \

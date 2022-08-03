@@ -6,3 +6,7 @@ variable "image_name" {
   type = string
   default = "pixelcount"
 }
+variable "project_id" {
+  type = string
+  default = "social-climate-tech"
+}
