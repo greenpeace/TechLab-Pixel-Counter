@@ -1,31 +1,24 @@
 # Python standard libraries
-import json
 import os
 import logging
-import sqlite3
 import base64
 import werkzeug
 import time
 
 # Third-party libraries
-from flask import Flask, request, url_for, redirect, jsonify, render_template, abort
-from google.cloud.firestore import Increment
-from flask_login import (
-    LoginManager,
-    current_user,
-    login_required,
-    login_user,
-    logout_user,
-)
-from oauthlib.oauth2 import WebApplicationClient
+from flask import Flask, session, request, url_for, redirect, jsonify, render_template, abort
+import pathlib
 import requests
+from pip._vendor import cachecontrol
 
 # Internal imports
-from db import init_db_command
-from user import User
 from getsecret import getsecrets
 
 # Install Google Libraries
+from google.cloud.firestore import Increment
+from google.oauth2 import id_token
+from google_auth_oauthlib.flow import Flow
+import google.auth.transport.requests
 import google.cloud.logging
 from firebase_admin import credentials, firestore, initialize_app
 import firebase_admin
@@ -50,15 +43,9 @@ except:
 ## Get start time
 start_time = time.time()
 
-# Naive database setup
-#try:
-#    init_db_command()
-#except sqlite3.OperationalError:
-    # Assume it's already been created
-#    pass
-
 # Get the secret for Service Account
-client_secret = getsecrets("service-account-key",project_id)
+client_secret = getsecrets("client-secret-key",project_id)
+app_secret_key = getsecrets("app_secret_key",project_id)
 
 # initialize firebase sdk
 CREDENTIALS = credentials.ApplicationDefault()
@@ -66,12 +53,6 @@ firebase_admin.initialize_app(CREDENTIALS, {
     'projectId': project_id,
 })
 
-# Configuration
-GOOGLE_CLIENT_ID = os.environ['GOOGLE_CLIENT_ID']
-GOOGLE_CLIENT_SECRET = os.environ['GOOGLE_CLIENT_SECRET']
-GOOGLE_DISCOVERY_URL = (
-    "https://accounts.google.com/.well-known/openid-configuration"
-)
 
 def page_not_found(e):
   return render_template('404.html'), 404
@@ -81,15 +62,21 @@ def internal_server_error(e):
 
 # Initialize Flask App
 app = Flask(__name__)
-#app.secret_key = os.environ("GOOGLE_APPLICATION_CREDENTIALS") or os.urandom(24)
-
-# User session management setup
-# https://flask-login.readthedocs.io/en/latest
-login_manager = LoginManager()
-login_manager.init_app(app)
-
-# OAuth 2 client setup
-#client = WebApplicationClient(GOOGLE_CLIENT_ID)
+#it is necessary to set a password when dealing with OAuth 2.0
+app.secret_key = app_secret_key 
+#this is to set our environment to https because OAuth 2.0 only supports https environments
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+#enter your client id you got from Google console
+GOOGLE_CLIENT_ID = client_secret
+#set the path to where the .json file you got Google console is
+client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret.json")
+#Flow is OAuth 2.0 a class that stores all the information on how we want to authorize our users
+flow = Flow.from_client_secrets_file( 
+    client_secrets_file=client_secrets_file,
+    scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],  #here we are specifing what do we get after the authorization
+    #and the redirect URI is the point where the user will end up after the authorization
+    redirect_uri="http://127.0.0.1:8080/callback"  
+)
 
 # Initialize Firestore DB
 db = firestore.client()
@@ -98,117 +85,80 @@ counter_ref = db.collection(u'counters')
 # Donation firestore collection
 donation_ref = db.collection(u'donation')
 
-# Flask-Login helper to retrieve a user from our db
-@login_manager.user_loader
-def load_user(user_id):
-    return User.get(user_id)
-
 logging.info("Start processing Function")
 
 # Register Error Handlers
 app.register_error_handler(404, page_not_found)
 app.register_error_handler(500, internal_server_error)
+
+#a function to check if the user is authorized or not
+def login_is_required(function):
+    def wrapper(*args, **kwargs):
+        #authorization required
+        if "google_id" not in session:
+            return abort(401)
+        else:
+            return function()
+    return wrapper
+
 #
 # API Route Default displays a webpage
 #
 @app.route("/")
 def index():
-    if current_user.is_authenticated:
-        return render_template('index.html', **locals())
-    else:
-        return render_template('login.html', **locals())
+    return render_template('login.html', **locals())
 
-@app.route('/')
+@app.route("/main")
+#@login_is_required
 def main():
     return render_template('index.html', **locals())
 
 #
-# Login
-# 
-@app.route("/login")
-def login():
-    # Find out what URL to hit for Google login
-    google_provider_cfg = get_google_provider_cfg()
-    authorization_endpoint = google_provider_cfg["authorization_endpoint"]
-
-    # Use library to construct the request for Google login and provide
-    # scopes that let you retrieve user's profile from Google
-    request_uri = client.prepare_request_uri(
-        authorization_endpoint,
-        redirect_uri=request.base_url + "/callback",
-        scope=["openid", "email", "profile"],
-    )
-    return redirect(request_uri)
-
+# API Route Default displays a webpage
 #
-# Logout
+@app.route("/login")  #the page where the user can login
+def login():
+    #asking the flow class for the authorization (login) url
+    authorization_url, state = flow.authorization_url()
+    session["state"] = state
+    return redirect(authorization_url)
+
+#this is the page that will handle the callback process meaning process after the authorization
+@app.route("/callback")
+def callback():
+    flow.fetch_token(authorization_response=request.url)
+
+    if not session["state"] == request.args["state"]:
+        abort(500)  #state does not match!
+
+    credentials = flow.credentials
+    request_session = requests.session()
+    cached_session = cachecontrol.CacheControl(request_session)
+    token_request = google.auth.transport.requests.Request(session=cached_session)
+    
+    #the final page where the authorized users will end up
+    id_info = id_token.verify_oauth2_token(
+        id_token=credentials._id_token,
+        request=token_request,
+        audience=GOOGLE_CLIENT_ID
+    )
+    # defing the results to show on the page
+    session["google_id"] = id_info.get("sub")  
+    session["name"] = id_info.get("name")
+    return redirect("/main")
+#
+# the logout page and function
 #
 @app.route("/logout")
-@login_required
 def logout():
-    logout_user()
-    return redirect(url_for("index"))
-
-#
-# Login Callback
-# 
-@app.route("/login/callback")
-def callback():
-    # Get authorization code Google sent back to you
-    code = request.args.get("code")
-    # things on behalf of a user
-    google_provider_cfg = get_google_provider_cfg()
-    token_endpoint = google_provider_cfg["token_endpoint"]
-    # Prepare and send a request to get tokens! Yay tokens!
-    token_url, headers, body = client.prepare_token_request(
-        token_endpoint,
-        authorization_response=request.url,
-        redirect_url=request.base_url,
-        code=code
-    )
-    token_response = requests.post(
-        token_url,
-        headers=headers,
-        data=body,
-        auth=(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET),
-    )
-    
-    # Parse the tokens!
-    client.parse_request_body_response(json.dumps(token_response.json()))
-
-    # Google profile image and email
-    userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
-    uri, headers, body = client.add_token(userinfo_endpoint)
-    userinfo_response = requests.get(uri, headers=headers, data=body)
-    # verified their email through Google!
-    if userinfo_response.json().get("email_verified"):
-        unique_id = userinfo_response.json()["sub"]
-        users_email = userinfo_response.json()["email"]
-        picture = userinfo_response.json()["picture"]
-        users_name = userinfo_response.json()["given_name"]
-    else:
-        return "User email not available or not verified by Google.", 400
-
-    # Create a user in your db with the information provided
-    # by Google
-    user = User(
-        id_=unique_id, name=users_name, email=users_email, profile_pic=picture
-    )
-
-    # Doesn't exist? Add it to the database.
-    if not User.get(unique_id):
-        User.create(unique_id, users_name, users_email, picture)
-
-    # Begin user session by logging the user in
-    login_user(user)
-
-    # Send user back to homepage
-    return redirect(url_for("index"))
+    session.clear()
+    return redirect("/")
 
 #
 # API Route add a counter by ID - requires json file body with id and count
 #
-@app.route('/add', methods=['POST'])
+@app.route("/add", methods=['POST'])
+#@login_is_required
 def create():
     try:
         id = request.json['id']
@@ -221,7 +171,8 @@ def create():
 # API Route add with GET a counter by ID - requires json file body with id and count
 #   /addset?id=<id>&count=<count>
 #
-@app.route('/addset', methods=['GET'])
+@app.route("/addset", methods=['GET'])
+#@login_is_required
 def createset():
     try:
         counter_id = request.args.get('id')
@@ -232,7 +183,8 @@ def createset():
 #
 # API Route list all or a speific counter by ID - requires json file body with id and count
 #
-@app.route('/list', methods=['GET'])
+@app.route("/list", methods=['GET'])
+#@login_is_required
 def read():
     try:
         # Check if ID was passed to URL query
@@ -250,7 +202,7 @@ def read():
 # API Route Update a counter by ID - requires json file body with id and count
 # API endpoint /update?id=<id>&count=<count>
 #
-@app.route('/update', methods=['POST', 'PUT'])
+@app.route("/update", methods=['POST', 'PUT'])
 def update():
     try:
         id = request.json['id']
@@ -264,7 +216,7 @@ def update():
 # API endpoint /counter 
 # json {"id":"GP Canada","count", 0}
 #
-@app.route('/counter', methods=['POST', 'PUT'])
+@app.route("/counter", methods=['POST', 'PUT'])
 def counter():
     try:
         id = request.json['id']
@@ -277,7 +229,7 @@ def counter():
 # The count route used for pixel image to increase a count using a GET request
 # API endpoint /count?id=<id>
 ##
-@app.route('/count', methods=['GET'])
+@app.route("/count", methods=['GET'])
 def count():
     try:
         id = request.args.get('id')  
@@ -290,7 +242,8 @@ def count():
 # The API endpoint allows the user to get the endpoint total defined  by id
 # API endpoint /signup?id=<id>
 ##
-@app.route('/signups', methods=['POST', 'PUT'])
+@app.route("/signups", methods=['POST', 'PUT'])
+@login_is_required
 def signups():    
     try:
         if request.method == "POST":
@@ -302,14 +255,14 @@ def signups():
     except Exception as e:
         return render_template('index.html', output="An Error Occured: {e}")
         #return f"An Error Occured: {e}" 
-
-
+        
 ##
 # The API endpoint is an example on how you can submit a form acapture the data and submit it to the database
 # API endpoint /donation
 # Post request with json form data{"id":"GP Canada","count", 0}
 ##
-@app.route('/donationform', methods=['GET'])
+@app.route("/donationform", methods=['GET'])
+#@login_is_required
 def donationform():
     return render_template('donation.html',**locals())
 
@@ -318,7 +271,8 @@ def donationform():
 # API endpoint /donation
 # Post request with json form data{"id":"GP Canada","count", 0}
 ##
-@app.route('/donation', methods=['POST', 'PUT'])
+@app.route("/donation", methods=['POST', 'PUT'])
+#@login_is_required
 def donation():    
     try:
         donation_ref.document().set(request.form)
@@ -331,7 +285,8 @@ def donation():
 #
 # API Route list all or a speific counter by ID - requires json file body with id and count
 #
-@app.route('/donationlist', methods=['GET'])
+@app.route("/donationlist", methods=['GET'])
+#@login_is_required
 def donationlist():
     try:
         donation = [doc.to_dict() for doc in donation_ref.stream()]
@@ -343,7 +298,7 @@ def donationlist():
 # API Route Delete a counter by ID /delete?id=<id>
 # API Enfpoint /delete?id=<id>
 #
-@app.route('/delete', methods=['GET', 'DELETE'])
+@app.route("/delete", methods=['GET', 'DELETE'])
 def delete():
     try:
         # Check for ID in URL query
@@ -367,12 +322,6 @@ def not_found_error(error):
 def internal_error(error):
     logging.info(f'500 System Error')
     return render_template('500.html'), 500
-
-# 
-# Get Google Credentials
-#
-def get_google_provider_cfg():
-    return requests.get(GOOGLE_DISCOVERY_URL).json()
 
 #
 # Setting up to serve on port 8080
