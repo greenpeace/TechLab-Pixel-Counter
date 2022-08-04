@@ -3,7 +3,6 @@ import os
 import logging
 import base64
 import werkzeug
-import time
 
 # Third-party libraries
 from flask import Flask, session, request, url_for, redirect, jsonify, render_template, abort
@@ -33,15 +32,9 @@ try:
     project_id = os.environ["GCP_PROJECT"]
 except:
     # Set Local Environment Variables (Local)
-    os.environ['GCP_PROJECT'] = 'social-climate-tech'
-    os.environ['GOOGLE_CLIENT_ID'] = ''
-    os.environ['GOOGLE_CLIENT_SECRET'] = ''
-    
+    os.environ['GCP_PROJECT'] = 'social-climate-tech'    
     # Get project id to intiate
     project_id = os.environ["GCP_PROJECT"]
-
-## Get start time
-start_time = time.time()
 
 # Get the secret for Service Account
 client_secret = getsecrets("client-secret-key",project_id)
@@ -99,6 +92,8 @@ def login_is_required(function):
             return abort(401)
         else:
             return function()
+    # Renaming the function name:
+    wrapper.__name__ = function.__name__
     return wrapper
 
 #
@@ -109,7 +104,7 @@ def index():
     return render_template('login.html', **locals())
 
 @app.route("/main")
-#@login_is_required
+@login_is_required
 def main():
     return render_template('index.html', **locals())
 
@@ -158,7 +153,7 @@ def logout():
 # API Route add a counter by ID - requires json file body with id and count
 #
 @app.route("/add", methods=['POST'])
-#@login_is_required
+@login_is_required
 def create():
     try:
         id = request.json['id']
@@ -172,7 +167,7 @@ def create():
 #   /addset?id=<id>&count=<count>
 #
 @app.route("/addset", methods=['GET'])
-#@login_is_required
+@login_is_required
 def createset():
     try:
         counter_id = request.args.get('id')
@@ -184,7 +179,7 @@ def createset():
 # API Route list all or a speific counter by ID - requires json file body with id and count
 #
 @app.route("/list", methods=['GET'])
-#@login_is_required
+@login_is_required
 def read():
     try:
         # Check if ID was passed to URL query
@@ -262,7 +257,7 @@ def signups():
 # Post request with json form data{"id":"GP Canada","count", 0}
 ##
 @app.route("/donationform", methods=['GET'])
-#@login_is_required
+@login_is_required
 def donationform():
     return render_template('donation.html',**locals())
 
@@ -272,7 +267,7 @@ def donationform():
 # Post request with json form data{"id":"GP Canada","count", 0}
 ##
 @app.route("/donation", methods=['POST', 'PUT'])
-#@login_is_required
+@login_is_required
 def donation():    
     try:
         donation_ref.document().set(request.form)
@@ -286,7 +281,7 @@ def donation():
 # API Route list all or a speific counter by ID - requires json file body with id and count
 #
 @app.route("/donationlist", methods=['GET'])
-#@login_is_required
+@login_is_required
 def donationlist():
     try:
         donation = [doc.to_dict() for doc in donation_ref.stream()]
