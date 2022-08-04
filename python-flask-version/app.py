@@ -37,12 +37,25 @@ client = google.cloud.logging.Client()
 try:
     from config import BUCKET # only cloud
     # Get the sites environment credentials
-    project_id = os.environ["PROJECT"]
+    project_id = os.environ["GCP_PROJECT"]
 except:
-    project_id = 'social-climate-tech'
+    # Set Local Environment Variables (Local)
+    os.environ['GCP_PROJECT'] = 'social-climate-tech'
+    os.environ['GOOGLE_CLIENT_ID'] = ''
+    os.environ['GOOGLE_CLIENT_SECRET'] = ''
+    
+    # Get project id to intiate
+    project_id = os.environ["GCP_PROJECT"]
 
 ## Get start time
 start_time = time.time()
+
+# Naive database setup
+#try:
+#    init_db_command()
+#except sqlite3.OperationalError:
+    # Assume it's already been created
+#    pass
 
 # Get the secret for Service Account
 client_secret = getsecrets("service-account-key",project_id)
@@ -54,8 +67,8 @@ firebase_admin.initialize_app(CREDENTIALS, {
 })
 
 # Configuration
-#GOOGLE_CLIENT_ID = CREDENTIALS
-#GOOGLE_CLIENT_SECRET = CREDENTIALS.client_secret
+GOOGLE_CLIENT_ID = os.environ['GOOGLE_CLIENT_ID']
+GOOGLE_CLIENT_SECRET = os.environ['GOOGLE_CLIENT_SECRET']
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 )
@@ -68,19 +81,12 @@ def internal_server_error(e):
 
 # Initialize Flask App
 app = Flask(__name__)
-#app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
+#app.secret_key = os.environ("GOOGLE_APPLICATION_CREDENTIALS") or os.urandom(24)
 
 # User session management setup
 # https://flask-login.readthedocs.io/en/latest
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-# Naive database setup
-#try:
-#    init_db_command()
-#except sqlite3.OperationalError:
-    # Assume it's already been created
- #   pass
 
 # OAuth 2 client setup
 #client = WebApplicationClient(GOOGLE_CLIENT_ID)
