@@ -46,7 +46,7 @@ firebase_admin.initialize_app(CREDENTIALS, {
     'projectId': project_id,
 })
 
-
+# Create the Flask application error handlers
 def page_not_found(e):
   return render_template('404.html'), 404
 
@@ -93,7 +93,7 @@ def login_is_required(function):
         else:
             return function()
     # Renaming the function name:
-    wrapper.__name__ = function.__name__
+    #wrapper.__name__ = function.__name__
     return wrapper
 
 #
@@ -103,7 +103,7 @@ def login_is_required(function):
 def index():
     return render_template('login.html', **locals())
 
-@app.route("/main")
+@app.route("/main", endpoint='main')
 @login_is_required
 def main():
     return render_template('index.html', **locals())
@@ -152,7 +152,7 @@ def logout():
 #
 # API Route add a counter by ID - requires json file body with id and count
 #
-@app.route("/add", methods=['POST'])
+@app.route("/add", methods=['POST'], endpoint='create')
 @login_is_required
 def create():
     try:
@@ -166,7 +166,7 @@ def create():
 # API Route add with GET a counter by ID - requires json file body with id and count
 #   /addset?id=<id>&count=<count>
 #
-@app.route("/addset", methods=['GET'])
+@app.route("/addset", methods=['GET'], endpoint='createset')
 @login_is_required
 def createset():
     try:
@@ -178,7 +178,7 @@ def createset():
 #
 # API Route list all or a speific counter by ID - requires json file body with id and count
 #
-@app.route("/list", methods=['GET'])
+@app.route("/list", methods=['GET'], endpoint='read')
 @login_is_required
 def read():
     try:
@@ -237,7 +237,7 @@ def count():
 # The API endpoint allows the user to get the endpoint total defined  by id
 # API endpoint /signup?id=<id>
 ##
-@app.route("/signups", methods=['POST', 'PUT'])
+@app.route("/signups", methods=['POST', 'PUT'], endpoint='signups')
 @login_is_required
 def signups():    
     try:
@@ -256,7 +256,7 @@ def signups():
 # API endpoint /donation
 # Post request with json form data{"id":"GP Canada","count", 0}
 ##
-@app.route("/donationform", methods=['GET'])
+@app.route("/donationform", methods=['GET'], endpoint='donationform')
 @login_is_required
 def donationform():
     return render_template('donation.html',**locals())
@@ -266,7 +266,7 @@ def donationform():
 # API endpoint /donation
 # Post request with json form data{"id":"GP Canada","count", 0}
 ##
-@app.route("/donation", methods=['POST', 'PUT'])
+@app.route("/donation", methods=['POST', 'PUT'], endpoint='donation')
 @login_is_required
 def donation():    
     try:
@@ -280,7 +280,7 @@ def donation():
 #
 # API Route list all or a speific counter by ID - requires json file body with id and count
 #
-@app.route("/donationlist", methods=['GET'])
+@app.route("/donationlist", methods=['GET'], endpoint='donationlist')
 @login_is_required
 def donationlist():
     try:

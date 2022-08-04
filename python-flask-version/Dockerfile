@@ -9,9 +9,7 @@ COPY . /app
 
 ENV PYTHONUNBUFFERED=1 \
     GOOGLE_APPLICATION_CREDENTIALS=key.json \
-    GCP_PROJECT="social-climate-tech" \
-    GOOGLE_CLIENT_ID="social-climate-tech" \
-    GOOGLE_CLIENT_SECRET="social-climate-tech"
+    GCP_PROJECT="social-climate-tech"
 
 RUN pip install -r requirements.txt
 
