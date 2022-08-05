@@ -68,7 +68,8 @@ flow = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file,
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],  #here we are specifing what do we get after the authorization
     #and the redirect URI is the point where the user will end up after the authorization
-    redirect_uri="http://127.0.0.1:8080/callback"  
+    redirect_uri="http://127.0.0.1:8080/callback"
+    #redirect_uri="https://pixelcount-m3fgrb62iq-lz.a.run.app//callback"  
 )
 
 # Initialize Firestore DB
@@ -175,6 +176,27 @@ def createset():
         return jsonify({"success": True}), 200
     except Exception as e:
         return f"An Error Occured: {e}"
+
+#
+# API Route add a counter by ID - requires json file body with id and count
+#
+@app.route("/addlist", methods=['GET'], endpoint='addlist')
+@login_is_required
+def addlist():
+    return render_template('listadd.html', **locals())
+    
+#
+# API Route add a counter by ID - requires json file body with id and count
+#
+@app.route("/createlist", methods=['POST'], endpoint='createlist')
+@login_is_required
+def createlist():
+    try:
+        id = request.form['id']
+        counter_ref.document(id).set(request.form)
+        return redirect(url_for('read'))
+    except Exception as e:
+        return f"An Error Occured: {e}"
 #
 # API Route list all or a speific counter by ID - requires json file body with id and count
 #
@@ -193,6 +215,36 @@ def read():
 #            return jsonify(all_counters), 200
     except Exception as e:
         return f"An Error Occured: {e}"
+
+#
+# API Route list all or a speific counter by ID - requires json file body with id and count
+#
+@app.route("/listedit", methods=['GET'], endpoint='listedit')
+@login_is_required
+def listedit():
+    try:
+        # Check if ID was passed to URL query
+        counter_id = request.args.get('id')
+        counter = counter_ref.document(counter_id).get()
+        return render_template('listedit.html', ngo=counter.to_dict())
+#            return jsonify(u'{}'.format(counter.to_dict()['count'])), 200
+    except Exception as e:
+        return f"An Error Occured: {e}"
+    
+#
+# API Route Delete a counter by ID /delete?id=<id>
+# API Enfpoint /delete?id=<id>
+#
+@app.route("/listdelete", methods=['GET', 'DELETE'])
+def listdelete():
+    try:
+        # Check for ID in URL query
+        counter_id = request.args.get('id')
+        counter_ref.document(counter_id).delete()
+        return redirect(url_for('read'))
+    except Exception as e:
+        return f"An Error Occured: {e}"
+
 #
 # API Route Update a counter by ID - requires json file body with id and count
 # API endpoint /update?id=<id>&count=<count>
@@ -203,6 +255,20 @@ def update():
         id = request.json['id']
         counter_ref.document(id).update(request.json)
         return jsonify({"success": True}), 200
+    except Exception as e:
+        return f"An Error Occured: {e}"
+
+#
+# API Route Update a counter by ID - requires json file body with id and count
+# API endpoint /update?id=<id>&count=<count>
+#
+@app.route("/updateform", methods=['POST', 'PUT'], endpoint='updateform')
+@login_is_required
+def updateform():
+    try:
+        id = request.form['id']
+        counter_ref.document(id).update(request.form)
+        return redirect(url_for('read'))
     except Exception as e:
         return f"An Error Occured: {e}"
 
@@ -250,7 +316,15 @@ def signups():
     except Exception as e:
         return render_template('index.html', output="An Error Occured: {e}")
         #return f"An Error Occured: {e}" 
-        
+
+#
+# API Route add a counter by ID - requires json file body with id and count
+#
+@app.route("/adddonation", methods=['GET'], endpoint='adddonation')
+@login_is_required
+def adddonation():
+    return render_template('donationadd.html', **locals())
+
 ##
 # The API endpoint is an example on how you can submit a form acapture the data and submit it to the database
 # API endpoint /donation
@@ -285,7 +359,67 @@ def donation():
 def donationlist():
     try:
         donation = [doc.to_dict() for doc in donation_ref.stream()]
-        return render_template('donationlist.html', output=donation), 200
+        donations = {}
+        for doc in donation_ref.stream():
+            donations[doc.id] = doc.to_dict()
+            #print(u'{} => {}'.format(doc.id, doc.to_dict()))
+        
+        return render_template('donationlist.html', output=donations), 200
+    except Exception as e:
+        return f"An Error Occured: {e}"
+    
+#
+# API Route Update a counter by ID - requires json file body with id and count
+# API endpoint /update?id=<id>&count=<count>
+#
+@app.route("/updatedonationform", methods=['POST', 'PUT'], endpoint='updatedonationform')
+@login_is_required
+def updatedonationform():
+    try:
+        id = request.form['id']
+        donation_ref.document(id).update(request.form)
+        return redirect(url_for('donationlist'))
+    except Exception as e:
+        return f"An Error Occured: {e}"
+    
+#
+# API Route list all or a speific counter by ID - requires json file body with id and count
+#
+@app.route("/donationedit", methods=['GET'], endpoint='donationedit')
+@login_is_required
+def donationedit():
+    try:
+        # Check if ID was passed to URL query
+        id = request.args.get('ngo')
+        donation = donation_ref.document(id).get()
+        return render_template('donationedit.html', ngo=donation.to_dict())
+    except Exception as e:
+        return f"An Error Occured: {e}"
+    
+#
+# API Route add a counter by ID - requires json file body with id and count
+#
+@app.route("/donationcreate", methods=['POST'], endpoint='donationcreate')
+@login_is_required
+def donationcreate():
+    try:
+        id = request.form['id']
+        donation_ref.document(id).set(request.form)
+        return redirect(url_for('donationlist'))
+    except Exception as e:
+        return f"An Error Occured: {e}"
+    
+#
+# API Route Delete a counter by ID /delete?id=<id>
+# API Enfpoint /delete?id=<id>
+#
+@app.route("/deletedonation", methods=['GET', 'DELETE'])
+def deletedonation():
+    try:
+        # Check for ID in URL query
+        counter_id = request.args.get('id')
+        donation_ref.document(counter_id).delete()
+        return redirect(url_for('donationlist'))
     except Exception as e:
         return f"An Error Occured: {e}"
 

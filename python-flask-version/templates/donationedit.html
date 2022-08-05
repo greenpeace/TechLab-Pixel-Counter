@@ -1,0 +1,44 @@
+
+{% include "header.html" %}
+
+    <main role="main">
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <div class="container">
+            <div id="banner">
+                <h1>Edit a signup</h1>
+            </div>
+        </div>
+      </div>
+      <div class="container">
+        <!-- Example row of columns -->
+            <form action="/updatedonationform" method="post">
+              <div class="form-group">
+                <label for="id">NRO</label>  
+                <input class="form-control" name="id"  value="{{ ngo.id }}" placeholder="NGO"></input>
+              </div>
+                <hr>
+              <div class="form-group">
+                <label for="email">Email</label>  
+                <input type="email" class="form-control" name="email" value="{{ ngo.email }}"></input>
+              </div>
+                <hr>
+              <div class="form-group">
+                <label for="firstname">First Name</label>
+                <input type="text" class="form-control" name="firstname" value="{{ ngo.firstname }}"></input>
+              </div>
+                <hr>
+              <div class="form-group">
+                <label for="lastname">Last Name</label>
+                <input type="text"  class="form-control" name="lastname" value="{{ ngo.lastname }}"></input>
+              </div>
+                <br>
+                <br>
+                <input type="submit" value="Update"></input>
+            </form>
+            </div>
+        <hr>
+      </div> <!-- /container -->
+    </main>
+
+    {% include "footer.html" %}

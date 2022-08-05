@@ -1,45 +1,5 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
 
-    <title>Pixel Counter</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Rubik:300,400,500,700,900|Work+Sans:400,500,600,700" 8/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/page.css') }}">
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-      <a class="navbar-brand" href="{{ url_for('main') }}">Pixel Counter</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="{{ url_for('main') }}">Home <span class="sr-only">(current)</span></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('read') }}">List</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('donationform') }}">Donation</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('donationlist') }}">List Donation</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-
+{% include "header.html" %}
     <main role="main">
 
       <!-- Main jumbotron for a primary marketing message or call to action -->
@@ -56,6 +16,9 @@
         <div class="row">
             <div class="card" id="output">
                 <div class="card-body">
+                    <a class="btn btn-sm btn-success" href="/addlist" title="Add" ><i class="glyphicon glyphicon-pencil"></i> Add Another Counter</a>
+                    <br />
+                    <br />
                       <table class="table table-striped">
                         <thead>
                           <tr>
@@ -64,6 +27,8 @@
                             <th scope="col">Counter</th>
                             <th scope="col">URL</th>
                             <th scope="col">Contact point</th>
+                            <th scope="col">End point</th>
+                            <th style="width:200px;">Action</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -71,10 +36,15 @@
                             {% for ngo in output %}
                             <tr>
                               <th scope="row"></th>
-                              <td>{{ngo.id}}</td>
-                              <td>{{ngo.count}}</td>
-                              <td>{{ngo.url}}</td>
-                              <td>{{ngo.contactpoint}}</td>  
+                              <td>{{ ngo.id }}</td>
+                              <td>{{ ngo.count }}</td>
+                              <td>{{ ngo.url }}</td>
+                              <td>{{ ngo.contactpoint }}</td> 
+                              <td><b>/count?id={{ ngo.id }}</b></td>
+                              <td>
+                                <a class="btn btn-sm btn-success" href="/listedit?id={{ ngo.id }}" title="Edit" ><i class="glyphicon glyphicon-pencil"></i> Edit</a>
+                                <a class="btn btn-sm btn-danger" href="/listdelete?id={{ ngo.id }}" title="Delete"><i class="glyphicon glyphicon-pencil"></i> Delete</a>
+                              </td>
                             </tr>
                             {% endfor %}
                           {% endif %}      
@@ -89,8 +59,4 @@
 
     </main>
 
-    <footer class="container">
-      <p>&copy;</p>
-    </footer>
-  </body>
-</html>
+    {% include "footer.html" %}
