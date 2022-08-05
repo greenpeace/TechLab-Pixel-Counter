@@ -19,7 +19,7 @@ from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 import google.auth.transport.requests
 import google.cloud.logging
-from firebase_admin import credentials, firestore, initialize_app
+from firebase_admin import credentials, firestore
 import firebase_admin
 
 ## Logging Client
@@ -39,6 +39,7 @@ except:
 # Get the secret for Service Account
 client_secret = getsecrets("client-secret-key",project_id)
 app_secret_key = getsecrets("app_secret_key",project_id)
+restrciteddomain = getsecrets("restrciteddomain",project_id)
 
 # initialize firebase sdk
 CREDENTIALS = credentials.ApplicationDefault()
@@ -57,6 +58,7 @@ def internal_server_error(e):
 app = Flask(__name__)
 #it is necessary to set a password when dealing with OAuth 2.0
 app.secret_key = app_secret_key 
+
 #this is to set our environment to https because OAuth 2.0 only supports https environments
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 #enter your client id you got from Google console
@@ -66,10 +68,13 @@ client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret
 #Flow is OAuth 2.0 a class that stores all the information on how we want to authorize our users
 flow = Flow.from_client_secrets_file( 
     client_secrets_file=client_secrets_file,
-    scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],  #here we are specifing what do we get after the authorization
+    scopes=["https://www.googleapis.com/auth/userinfo.profile", 
+            "https://www.googleapis.com/auth/userinfo.email",
+            "openid"
+            ],
     #and the redirect URI is the point where the user will end up after the authorization
     redirect_uri="http://127.0.0.1:8080/callback"
-    #redirect_uri="https://pixelcount-m3fgrb62iq-lz.a.run.app//callback"  
+    #redirect_uri="https://pixelcount-m3fgrb62iq-lz.a.run.app//callback"
 )
 
 # Initialize Firestore DB
@@ -138,6 +143,14 @@ def callback():
         request=token_request,
         audience=GOOGLE_CLIENT_ID
     )
+    
+    #
+    # This code is to limit the login to a specific domain
+    #
+    email = id_info.get("email")
+    if email.split('@')[1] != restrciteddomain:
+        return redirect(url_for('index'))
+        
     # defing the results to show on the page
     session["google_id"] = id_info.get("sub")  
     session["name"] = id_info.get("name")
@@ -358,13 +371,13 @@ def donation():
 @login_is_required
 def donationlist():
     try:
-        donation = [doc.to_dict() for doc in donation_ref.stream()]
-        donations = {}
+        donations = []     
         for doc in donation_ref.stream():
-            donations[doc.id] = doc.to_dict()
-            #print(u'{} => {}'.format(doc.id, doc.to_dict()))
-        
-        return render_template('donationlist.html', output=donations), 200
+            don = doc.to_dict()
+            don["docid"] = doc.id
+            donations.append(don)
+
+        return render_template('donationlist.html', donations=donations)
     except Exception as e:
         return f"An Error Occured: {e}"
     
@@ -376,7 +389,7 @@ def donationlist():
 @login_is_required
 def updatedonationform():
     try:
-        id = request.form['id']
+        id = request.form['docid']
         donation_ref.document(id).update(request.form)
         return redirect(url_for('donationlist'))
     except Exception as e:
@@ -389,10 +402,15 @@ def updatedonationform():
 @login_is_required
 def donationedit():
     try:
+        donations = []
         # Check if ID was passed to URL query
-        id = request.args.get('ngo')
+        id = request.args.get('id')
         donation = donation_ref.document(id).get()
-        return render_template('donationedit.html', ngo=donation.to_dict())
+        don = donation.to_dict()
+        don["docid"] = donation.id
+        donations.append(don)
+        
+        return render_template('donationedit.html', ngo=don)
     except Exception as e:
         return f"An Error Occured: {e}"
     
@@ -403,8 +421,7 @@ def donationedit():
 @login_is_required
 def donationcreate():
     try:
-        id = request.form['id']
-        donation_ref.document(id).set(request.form)
+        donation_ref.document().set(request.form)
         return redirect(url_for('donationlist'))
     except Exception as e:
         return f"An Error Occured: {e}"

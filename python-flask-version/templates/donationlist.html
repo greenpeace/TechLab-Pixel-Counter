@@ -16,36 +16,35 @@
             <div class="card" id="output">
                 <div class="card-body">
                     <a class="btn btn-sm btn-success" href="/adddonation" title="Add" ><i class="glyphicon glyphicon-pencil"></i> Add Another Signup</a>
-                    </br></br>  
-                    <table class="table table-striped">
+                    </br></br>
+                    {% block content %}
+                    <table id="datast" class="table table-striped">
                         <thead>
                           <tr>
-                            <th scope="col">#</th>
                             <th scope="col">NRO</th>
                             <th scope="col">Email</th>
                             <th scope="col">First Name</th>
                             <th scope="col">Last Name</th>
-                            <th style="width:200px;">Action</th>
+                            <th style="width:100px;">Action</th>
+                            <th style="width:100px;">Action</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {% if output %}
-                            {% for ngo in output %}
+                          {% if donations %}
+                            {% for entry in donations %}
                             <tr>
-                              <th scope="row"></th>
-                              <td>{{ngo.id}}</td>
-                              <td>{{ngo.email}}</td>
-                              <td>{{ngo.firstname}}</td>
-                              <td>{{ngo.lastname}}</td>  
-                              <td>
-                                <a class="btn btn-sm btn-success" href="/donationedit?id={{ ngo }}" title="Edit" ><i class="glyphicon glyphicon-pencil"></i> Edit</a>
-                                <a class="btn btn-sm btn-danger" href="/deletedonation?id={{ ngo }}" title="Delete"><i class="glyphicon glyphicon-pencil"></i> Delete</a>
-                              </td>
+                              <td>{{entry.id}}</td>
+                              <td>{{entry.email}}</td>
+                              <td>{{entry.firstname}}</td>
+                              <td>{{entry.lastname}}</td>  
+                              <td><a class="btn btn-sm btn-success" href="/donationedit?id={{ entry.docid }}" title="Edit" ><i class="glyphicon glyphicon-pencil"></i> Edit</a></td>
+                              <td><a class="btn btn-sm btn-danger" href="/deletedonation?id={{ entry.docid }}" title="Delete"><i class="glyphicon glyphicon-pencil"></i> Delete</a></td>
                             </tr>
                             {% endfor %}
-                          {% endif %}      
+                          {% endif %}
                         </tbody>
                       </table>
+                      {% endblock %}
                     </div>
                 </div>
             </div>
@@ -55,8 +54,19 @@
 
     </main>
 
-    <footer class="container">
-      <p>&copy;</p>
-    </footer>
-  </body>
-</html>
+  {% block scripts %}
+  <script>
+    $(document).ready(function () {
+      $('#data').DataTable({
+        columns: [
+          null,
+          {searchable: false},
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false},
+          null],
+      });
+    });
+  </script>
+{% endblock %}
+
+    {% include "footer.html" %}
