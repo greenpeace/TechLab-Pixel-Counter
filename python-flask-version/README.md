@@ -166,7 +166,7 @@ We are developing on the Mac ARM architecture but we want to create a x86 compat
 docker buildx build \
 --platform linux/amd64 \
 --push \
--t eu.gcr.io/<project-id>/pixelcount:v2 .
+-t eu.gcr.io/<project-id>/pixelcount:v7 .
 ```
 
 As you can see I am tagging for each new version with adding:v<number> like this pixelcount:v2

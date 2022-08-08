@@ -14,15 +14,21 @@
     <div class="container">
         <!-- Example row of columns -->
         <div class="row">
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              {% for message in messages %}
+                  {{ message }}
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
             <div class="card" id="output">
                 <div class="card-body">
                     <a class="btn btn-sm btn-success" href="/addlist" title="Add" ><i class="glyphicon glyphicon-pencil"></i> Add Another Counter</a>
                     <br />
                     <br />
-                      <table class="table table-striped">
+                      <table id="datast" class="table table-striped">
                         <thead>
                           <tr>
-                            <th scope="col">#</th>
                             <th scope="col">NRO</th>
                             <th scope="col">Counter</th>
                             <th scope="col">URL</th>
@@ -35,9 +41,8 @@
                           {% if output %}
                             {% for ngo in output %}
                             <tr>
-                              <th scope="row"></th>
                               <td>{{ ngo.id }}</td>
-                              <td>{{ ngo.count }}</td>
+                              <td>{{'{:,}'.format(ngo.count)}}</td>
                               <td>{{ ngo.url }}</td>
                               <td>{{ ngo.contactpoint }}</td> 
                               <td><b>/count?id={{ ngo.id }}</b></td>
@@ -58,5 +63,24 @@
       </div> <!-- /container -->
 
     </main>
+
+    {% block scripts %}
+
+    <script>
+        $(document).ready(function () {
+          $('#datast').DataTable({
+            columns: [
+                {data: 'id'},
+                {data: 'count'},
+                {data: 'url'},
+                {data: 'contactpoint'},
+                null,
+                {data: 'action', orderable: false}
+            ],
+          });
+        });
+    </script>
+  
+    {% endblock scripts %}
 
     {% include "footer.html" %}

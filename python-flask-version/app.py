@@ -5,7 +5,7 @@ import base64
 import werkzeug
 
 # Third-party libraries
-from flask import Flask, session, request, url_for, redirect, jsonify, render_template, abort
+from flask import Flask, session, request, url_for, redirect, jsonify, render_template, abort, flash
 import pathlib
 import requests
 from pip._vendor import cachecontrol
@@ -74,7 +74,7 @@ flow = Flow.from_client_secrets_file(
             ],
     #and the redirect URI is the point where the user will end up after the authorization
     redirect_uri="http://127.0.0.1:8080/callback"
-    #redirect_uri="https://pixelcount-m3fgrb62iq-lz.a.run.app//callback"
+    #redirect_uri="https://pixelcount-m3fgrb62iq-lz.a.run.app/callback"
 )
 
 # Initialize Firestore DB
@@ -149,6 +149,7 @@ def callback():
     #
     email = id_info.get("email")
     if email.split('@')[1] != restrciteddomain:
+        flash('Login successful')
         return redirect(url_for('index'))
         
     # defing the results to show on the page
@@ -205,10 +206,20 @@ def addlist():
 @login_is_required
 def createlist():
     try:
-        id = request.form['id']
-        counter_ref.document(id).set(request.form)
+        id = request.form.get('id')
+        
+        data = {
+            u'id': request.form.get('id'),
+            u'url': request.form.get('url'),
+            u'count': int(request.form.get('count')),
+            u'contactpoint': request.form.get('contactpoint')
+            }
+        
+        counter_ref.document(id).set(data)
+        flash('Data Succesfully Submitted')
         return redirect(url_for('read'))
     except Exception as e:
+        flash('An Error Occvured')
         return f"An Error Occured: {e}"
 #
 # API Route list all or a speific counter by ID - requires json file body with id and count

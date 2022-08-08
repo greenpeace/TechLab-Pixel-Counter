@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":rebaseStalePrs",
+    ":semanticCommits"
+  ],
+  "addLabels": [
+    "Issue"
+  ],
+  "dependencyDashboardLabels": [
+    "Renovate",
+    "Dependency Dashboard",
+    "Automated",
+    "Issue"
+  ]
+}

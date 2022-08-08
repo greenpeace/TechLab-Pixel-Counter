@@ -26,7 +26,7 @@
                             <th scope="col">First Name</th>
                             <th scope="col">Last Name</th>
                             <th style="width:100px;">Action</th>
-                            <th style="width:100px;">Action</th>
+                            <th style="width:100px;"></th>
                           </tr>
                         </thead>
                         <tbody>
@@ -55,18 +55,22 @@
     </main>
 
   {% block scripts %}
-  <script>
-    $(document).ready(function () {
-      $('#data').DataTable({
-        columns: [
-          null,
-          {searchable: false},
-          {orderable: false, searchable: false},
-          {orderable: false, searchable: false},
-          null],
-      });
-    });
-  </script>
-{% endblock %}
+
+    <script>
+        $(document).ready(function () {
+          $('#datast').DataTable({
+            columns: [
+                {data: 'id'},
+                {data: 'email'},
+                {data: 'firstname'},
+                {data: 'lastname'},
+                {data: 'action', orderable: false},
+                null
+            ],
+          });
+        });
+    </script>
+  
+    {% endblock scripts %}
 
     {% include "footer.html" %}

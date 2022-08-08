@@ -12,6 +12,13 @@
 <body>
     <div class="bg">
         <div class="block-center wd-xl">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
             <!-- START panel-->
                         <button mat-raised-button class="bw block google-login" (click)="login">
                                 <a href=login><img src="{{ url_for('static', filename='images/googlelogin.png') }}"></a>
