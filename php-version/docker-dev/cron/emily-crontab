@@ -1,5 +1,0 @@
-10 */2 * * * wget -o /dev/stderr --no-check-certificate http://localhost/sync/sync_curl/1/people 2>/dev/null
-12 */2 * * * wget -o /dev/stderr --no-check-certificate http://localhost/sync/sync_curl/1/whois 2>/dev/null
-14 */2 * * * wget -o /dev/stderr --no-check-certificate http://localhost/sync/sync_curl/1/emg_skills 2>/dev/null
-16 */2 * * * wget -o /dev/stderr --no-check-certificate http://localhost/sync/sync_curl/1/schedule 2>/dev/null
-0 9 * * * wget -o /dev/stderr --no-check-certificate http://localhost/noonreports/Noonnotify 2>/dev/null

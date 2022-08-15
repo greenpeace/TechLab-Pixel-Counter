@@ -29,7 +29,7 @@ resource "google_cloud_run_service" "pixelcount" {
   template {
     spec {
       containers {
-        image = "eu.gcr.io/make-smthng-website/pixelcount:v2"
+        image = "eu.gcr.io/make-smthng-website/pixelcount:v7"
         ports {
           container_port = 8080
         }

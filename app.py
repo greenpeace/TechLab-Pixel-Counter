@@ -37,9 +37,13 @@ except:
     project_id = os.environ["GCP_PROJECT"]
 
 # Get the secret for Service Account
-client_secret = getsecrets("client-secret-key",project_id)
+client_secret_details = getsecrets("client-secret-key",project_id)
 app_secret_key = getsecrets("app_secret_key",project_id)
 restrciteddomain = getsecrets("restrciteddomain",project_id)
+
+print("Client Secret Details", client_secret_details)
+print("App Secret Key", app_secret_key)
+print("Restricted Domain", restrciteddomain)
 
 # initialize firebase sdk
 CREDENTIALS = credentials.ApplicationDefault()
@@ -59,12 +63,14 @@ app = Flask(__name__)
 #it is necessary to set a password when dealing with OAuth 2.0
 app.secret_key = app_secret_key 
 
+print("the app secret", app.secret_key)
+
 #this is to set our environment to https because OAuth 2.0 only supports https environments
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 #enter your client id you got from Google console
-GOOGLE_CLIENT_ID = client_secret
+GOOGLE_CLIENT_ID = client_secret_details
 #set the path to where the .json file you got Google console is
-client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret_makesomething.json")
+client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret.json")
 #Flow is OAuth 2.0 a class that stores all the information on how we want to authorize our users
 flow = Flow.from_client_secrets_file( 
     client_secrets_file=client_secrets_file,
@@ -73,9 +79,11 @@ flow = Flow.from_client_secrets_file(
             "openid"
             ],
     #and the redirect URI is the point where the user will end up after the authorization
-    redirect_uri="http://127.0.0.1:8080/callback"
-    #redirect_uri="https://pixelcount-nv4os546dq-lz.a.run.app/callback"    
+    #redirect_uri="http://127.0.0.1:8080/callback"
+    redirect_uri="https://pixelcount-nv4os546dq-lz.a.run.app/callback"    
 )
+
+print('Client Secret File', client_secrets_file)
 
 # Initialize Firestore DB
 db = firestore.client()
@@ -121,6 +129,7 @@ def main():
 def login():
     #asking the flow class for the authorization (login) url
     authorization_url, state = flow.authorization_url()
+    print('AuthorizationUrl', authorization_url)
     session["state"] = state
     return redirect(authorization_url)
 
