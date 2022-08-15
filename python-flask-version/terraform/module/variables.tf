@@ -16,7 +16,7 @@ variable "image_name" {
 }
 variable "project_id" {
   type = string
-  default = "social-climate-tech"
+  default = "make-smthng-website"
 }
 
 ############### Standard Greenpeace Used Varibles #############################

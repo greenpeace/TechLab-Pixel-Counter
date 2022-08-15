@@ -29,10 +29,12 @@
                       <table id="datast" class="table table-striped">
                         <thead>
                           <tr>
+                            <th scope="col">Counter Name</th>
                             <th scope="col">NRO</th>
                             <th scope="col">Counter</th>
                             <th scope="col">URL</th>
-                            <th scope="col">Contact point</th>
+                            <th scope="col">Contact</th>
+                            <th scope="col">Campaign</th>
                             <th scope="col">End point</th>
                             <th style="width:200px;">Action</th>
                           </tr>
@@ -42,9 +44,11 @@
                             {% for ngo in output %}
                             <tr>
                               <td>{{ ngo.id }}</td>
+                              <td>{{ ngo.nro }}</td>
                               <td>{{'{:,}'.format(ngo.count)}}</td>
-                              <td>{{ ngo.url }}</td>
-                              <td>{{ ngo.contactpoint }}</td> 
+                              <td><a href="{{ ngo.url }}" target="new"><strong>{{ ngo.url }}</strong></a></td>
+                              <td>{{ ngo.contactpoint }}</td>
+                              <td>{{ ngo.campaign }}</td> 
                               <td><b>/count?id={{ ngo.id }}</b></td>
                               <td>
                                 <a class="btn btn-sm btn-success" href="/listedit?id={{ ngo.id }}" title="Edit" ><i class="glyphicon glyphicon-pencil"></i> Edit</a>
@@ -61,6 +65,11 @@
         </div>
         <hr>
       </div> <!-- /container -->
+      <div class="row">
+        <div>
+            <iframe src="/count?id=testcounter" width="1" height="1" frameborder=0 style="overflow:hidden;" scrolling="no"></iframe>
+        </div>
+      </div>
 
     </main>
 
@@ -71,9 +80,11 @@
           $('#datast').DataTable({
             columns: [
                 {data: 'id'},
+                {data: 'nro'},
                 {data: 'count'},
                 {data: 'url'},
                 {data: 'contactpoint'},
+                {data: 'campaign'},
                 null,
                 {data: 'action', orderable: false}
             ],

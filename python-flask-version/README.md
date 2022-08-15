@@ -7,6 +7,12 @@ You can try to run it from this location
 
 [![Run on Google Cloud](https://storage.googleapis.com/cloudrun/button.svg)](https://console.cloud.google.com/cloudshell/editor?shellonly=true&cloudshell_image=gcr.io/cloudrun/button&cloudshell_git_repo=https://github.com/greenpeace/TechLab-Pixel-Counter.git)
 
+You need to Enable the following Google apis
+
+Enable Firestore Database
+Enable Cloud Resource Manager API
+Enable Identity and Access Management (IAM) API
+Enable Cloud Run Admin API 
 
 # How it works
 
@@ -126,6 +132,19 @@ ACCOUNT is the service account name in the format
 [USERNAME]@[PROJECT-ID].iam.gserviceaccount.com. 
 ```
 
+# Setup Secret Manager
+
+These are the names of secrets variable the application expect being set
+
+client-secret-key - as it say the secret key from the Oauth setup
+app_secret_key - this is an application secret can be anything you want
+restrciteddomain - this is the domain name for were the application will limited the lgon from
+
+# Create an Oauth with web application flow
+
+
+# Service Accounts
+
 You can view existing service accounts on the Service Accounts page of console or with the command gcloud iam service-accounts list
 
 KEY-FILE is the service account key file. See the Identity and Access Management (IAM) 
@@ -166,7 +185,7 @@ We are developing on the Mac ARM architecture but we want to create a x86 compat
 docker buildx build \
 --platform linux/amd64 \
 --push \
--t eu.gcr.io/<project-id>/pixelcount:v7 .
+-t eu.gcr.io/<project-id>/pixelcount:v1 .
 ```
 
 As you can see I am tagging for each new version with adding:v<number> like this pixelcount:v2

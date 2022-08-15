@@ -16,8 +16,13 @@
             <form action="/updateform" method="post">
               <hr>
               <div class="form-group">
-                <label for="id">NGO</label>  
-                <input name="id" class="form-control" value="{{ ngo.id }}"></input>
+                <label for="id">Counter Name</label>  
+                <input type="text" name="id" class="form-control" value="{{ ngo.id }}"></input>
+              </div>
+              <hr>
+              <div class="form-group">
+                <label for="nro">NRO</label>  
+                <input type="text" name="nro" class="form-control" value="{{ ngo.nro }}"></input>
               </div>
                 <hr>
               <div class="form-group">
@@ -34,7 +39,12 @@
                 <label for="contactpoint">Contact</label>
                 <input type="text" class="form-control" name="contactpoint" value="{{ ngo.contactpoint }}"></input>
               </div>
-                <br>
+              <hr>
+              <div class="form-group">
+                <label for="campaign">Campaign</label>
+                <input type="text" class="form-control" name="campaign" value="{{ ngo.campaign }}"></input>
+              </div>
+              <br>
                 <br>
                 <input type="submit" value="Update"></input>
             </form>

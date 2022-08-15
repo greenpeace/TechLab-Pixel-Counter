@@ -15,8 +15,13 @@
             <form action="/createlist" method="post">
               <hr>
               <div class="form-group">
-                <label for="id">NGO</label>  
-                <input class="form-control" name="id" placeholder="Name of NGO Counter"></input>
+                <label for="id">Counter Name</label>  
+                <input type="text" name="id" class="form-control" placeholder="The counter name also the id for the counter"></input>
+              </div>
+              <hr>
+              <div class="form-group">
+                <label for="nro">NRO</label>  
+                <input type="text" class="form-control" name="nro" placeholder="Name of NGO Counter"></input>
               </div>
                 <hr>
               <div class="form-group">
@@ -32,6 +37,11 @@
               <div class="form-group">
                 <label for="contactpoint">Contact</label>
                 <input type="text" class="form-control" name="contactpoint"  placeholder="Who to contact about the counter"></input>
+              </div>
+              <hr>
+              <div class="form-group">
+                <label for="campaign">Campaign</label>
+                <input type="text" class="form-control" name="campaign" placeholder="Name of the campaign for this counter"></input>
               </div>
                 <br>
                 <br>

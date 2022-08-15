@@ -13,10 +13,10 @@ terraform {
       }
   }
     backend "gcs" {
-      bucket = "sct-terraform-state"
+      bucket = "msw-terraform-state"
       # Structure:
       # state/<application/<entity>/<environment>/
-      prefix = "state/socialclimatetech/test/"
+      prefix = "state/makesmthngwebsite/test/"
       # This configuration expects GOOGLE_CREDENTIALS to be avalible
       #credentials = "${file("${var.Service_Accounts_Dir}/sa_tfst_bucket_key.json")}"
       #bucket = "${TERRAFORM_STATE_BUCKET_NAME}"

@@ -1,0 +1,48 @@
+  {% include "header.html" %}
+
+    <main role="main">
+
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <div class="container">
+            <div id="banner">
+                <p>How to Use Pixel Counter
+                </p>
+            </div>
+        </div>
+      </div>
+
+    <div class="container">
+      <div id="banner">
+        <p>## Increase Counter
+          <br>
+          ### Count GET<br>
+          ###<br>
+          ### The count route used for pixel image to increase a count using a GET request<br>
+              API endpoint /count?id=<id><br>
+              example: http://localhost:8080/count?id=<counter_name><br>
+        </p>
+        <p>
+          ### Count POST<br>
+          ###<br>
+          ### API Route Increase Counter by ID - requires json file body with id and count<br>
+              API endpoint /counter <br>
+              json {"id":"GP Canada","count", 0} <br><br>
+          
+              example: http://localhost:8080/ <br>
+          </p>
+          <p>
+          ###<br>
+          ### The API endpoint allows the user to get the endpoint total defined  by id<br>
+              API endpoint /signup?id=<id><br><br>
+          
+              example: http://localhost:8080/signup?id=<counter_name><br>
+        </p>
+      </div>
+        <hr>
+    </div> <!-- /container -->
+
+    </main>
+
+    {% include "footer.html" %}
+    
