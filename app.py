@@ -149,7 +149,7 @@ def callback():
     #
     email = id_info.get("email")
     if email.split('@')[1] != restrciteddomain:
-        flash('Login successful')
+        flash('Login Failed - You do not have a @greenpeace.org email')
         return redirect(url_for('index'))
         
     # defing the results to show on the page

@@ -185,7 +185,7 @@ We are developing on the Mac ARM architecture but we want to create a x86 compat
 docker buildx build \
 --platform linux/amd64 \
 --push \
--t eu.gcr.io/make-smthng-website/pixelcount:v1 .
+-t eu.gcr.io/make-smthng-website/pixelcount:v2 .
 ```
 
 
