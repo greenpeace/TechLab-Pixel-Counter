@@ -1,17 +1,16 @@
 
 {% include "header.html" %}
-    <main role="main">
 
-      <!-- Main jumbotron for a primary marketing message or call to action -->
+<!-- Main jumbotron for a primary marketing message or call to action -->
       <div class="jumbotron">
-        <div class="container">
+        <div class="container-fluid">
             <div id="banner">
                 <h1>List of all counters</h1>
             </div>
         </div>
       </div>
 
-    <div class="container">
+    <div class="container-fluid">
         <!-- Example row of columns -->
         <div class="row">
           {% with messages = get_flashed_messages() %}
@@ -70,8 +69,6 @@
             <iframe src="/count?id=testcounter" width="1" height="1" frameborder=0 style="overflow:hidden;" scrolling="no"></iframe>
         </div>
       </div>
-
-    </main>
 
     {% block scripts %}
 

@@ -8,7 +8,7 @@ body {
    * Formatting the header area
    */
   header {
-    background-color: #DFB887;
+    background-color: #66CC00;
     height: 35px;
     width: 100%;
     opacity: .9;
@@ -73,4 +73,10 @@ body {
   .menu li a {
     color: #444;
     text-decoration: none;
+  }
+  .jumbotron {
+    padding: 5rem 1rem;
+  }  
+  .bg-dark {
+    background-color: #66CC00!important;
   }

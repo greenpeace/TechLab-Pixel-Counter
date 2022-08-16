@@ -185,8 +185,12 @@ We are developing on the Mac ARM architecture but we want to create a x86 compat
 docker buildx build \
 --platform linux/amd64 \
 --push \
--t eu.gcr.io/<project-id>/pixelcount:v4 .
+-t eu.gcr.io/make-smthng-website/pixelcount:v1 .
 ```
+
+
+export GOOGLE_APPLICATION_CREDENTIALS=key.json
+docker login -u _json_key -p "`cat ${GOOGLE_APPLICATION_CREDENTIALS}`" https://eu.gcr.io
 
 As you can see I am tagging for each new version with adding:v<number> like this pixelcount:v2
 
