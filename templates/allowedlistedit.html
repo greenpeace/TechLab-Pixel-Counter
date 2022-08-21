@@ -1,0 +1,37 @@
+
+    {% include "header.html" %}
+
+    <main role="main">
+
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <div class="container-fluid">
+            <div id="banner">
+                <h1>Edit a allowed domain</h1>
+            </div>
+        </div>
+      </div>
+    
+      <div class="container-fluid">
+            <form action="/allowedlistupdate" method="post">
+              <hr>
+              <div class="form-group">
+                <label for="id">Name</label>  
+                <input type="text" name="id" class="form-control" value="{{ ngo.id }}"></input>
+              </div>
+              <hr>
+              <div class="form-group">
+                <label for="nro">URL</label>  
+                <input type="text" name="domain" class="form-control" value="{{ ngo.domain }}"></input>
+              </div>
+                <hr>
+              <br>
+                <br>
+                <input type="submit" value="Update"></input>
+            </form>
+            </div>
+        <hr>
+      </div> <!-- /container -->
+    </main>
+
+    {% include "footer.html" %}

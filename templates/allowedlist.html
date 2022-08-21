@@ -1,0 +1,74 @@
+
+{% include "header.html" %}
+
+<!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <div class="container-fluid">
+            <div id="banner">
+                <h1>List of allowed domains</h1>
+            </div>
+        </div>
+      </div>
+
+    <div class="container-fluid">
+        <!-- Example row of columns -->
+        <div class="row">
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              {% for message in messages %}
+                  {{ message }}
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+            <div class="card" id="output">
+                <div class="card-body">
+                    <a class="btn btn-sm btn-success" href="/allowedlistadd" title="Add" ><i class="glyphicon glyphicon-pencil"></i> Add Another Domain</a>
+                    <br />
+                    <br />
+                      <table id="datast" class="table table-striped">
+                        <thead>
+                          <tr>
+                            <th scope="col">Id</th>
+                            <th scope="col">Domain Name</th>
+                            <th style="width:200px;">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% if allowed %}
+                            {% for ngo in allowed %}
+                            <tr>
+                              <td>{{ ngo.id }}</td>
+                              <td>{{ ngo.domain }}</td>
+                              <td>
+                                <a class="btn btn-sm btn-success" href="/allowedlistedit?id={{ ngo.id }}" title="Edit" ><i class="glyphicon glyphicon-pencil"></i> Edit</a>
+                                <a class="btn btn-sm btn-danger" href="/allowedlistdelete?id={{ ngo.id }}" title="Delete"><i class="glyphicon glyphicon-pencil"></i> Delete</a>
+                              </td>
+                            </tr>
+                            {% endfor %}
+                          {% endif %}      
+                        </tbody>
+                      </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+      </div> <!-- /container -->
+
+    {% block scripts %}
+
+    <script>
+        $(document).ready(function () {
+          $('#datast').DataTable({
+            columns: [
+                {data: 'id'},
+                {data: 'url'},
+               {data: 'action', orderable: false}
+            ],
+          });
+        });
+    </script>
+  
+    {% endblock scripts %}
+
+    {% include "footer.html" %}

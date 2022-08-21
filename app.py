@@ -74,15 +74,17 @@ flow = Flow.from_client_secrets_file(
             ],
     #and the redirect URI is the point where the user will end up after the authorization
     #redirect_uri="http://127.0.0.1:8080/callback"
-    redirect_uri="https://pixelcount-nv4os546dq-lz.a.run.app/callback"    
+    redirect_uri="https://pixelcounter.greenpeace.org/callback"   
 )
 
 # Initialize Firestore DB
 db = firestore.client()
 # Counters firestore collection
 counter_ref = db.collection(u'counters')
-# Donation firestore collection
-donation_ref = db.collection(u'donation')
+# Allowed origion collection
+allowedorigion_ref = db.collection(u'allowedorigion')
+# Allowed origion collection
+emailhash_ref = db.collection(u'amialhash')
 
 logging.info("Start processing Function")
 
@@ -113,6 +115,10 @@ def index():
 @login_is_required
 def main():
     return render_template('index.html', **locals())
+
+@app.route("/get_my_ip", methods=["GET"])
+def get_my_ip():
+    return jsonify({'ip': request.remote_addr}), 200
 
 #
 # API Route Default displays a webpage
@@ -336,10 +342,31 @@ def counter():
 @app.route("/count", methods=['GET'])
 def count():
     try:
-        id = request.args.get('id')  
-        counter_ref.document(id).update({u'count': Increment(1)})
-        counter_ref.document('totals').update({u'count': Increment(1)})
-        return base64.b64decode(b'='), 200
+        # Check if Remote Host is in the allowed list        
+        allowed_origin_list = []
+        for doc in allowedorigion_ref.stream():
+            allowed_origin_list.append(doc.to_dict()['domain'])
+        if 'REMOTE_HOST' in request.environ and request.environ['REMOTE_HOST'] in allowed_origin_list:
+            # On allowed lsut, check if ID was passed to URL query
+            email_hash = request.args.get('email_hash')
+            if email_hash is not None:
+                docRef = emailhash_ref.where('email_hash', '==', email_hash).get()
+                documents = [d for d in docRef]
+                # Check if hash value already exixsts in the database
+                if len(documents):
+                    # If exists, don not increase count by 1
+                    return base64.b64decode(b'='), 200
+                else:
+                    # Add hashed email to database
+                    data = {
+                        u'email_hash': email_hash,
+                    }
+                    emailhash_ref.document().set(data)
+            # Add Counter
+            id = request.args.get('id')  
+            counter_ref.document(id).update({u'count': Increment(1)})
+            counter_ref.document('totals').update({u'count': Increment(1)})
+            return base64.b64decode(b'='), 200
     except Exception as e:
         return f"An Error Occured: {e}"
     
@@ -347,9 +374,9 @@ def count():
 # The API endpoint allows the user to get the endpoint total defined  by id
 # API endpoint /signup?id=<id>
 ##
-@app.route("/signups", methods=['POST', 'PUT'], endpoint='signups')
+@app.route("/signup", methods=['POST', 'PUT'], endpoint='signup')
 @login_is_required
-def signups():    
+def signup():    
     try:
         if request.method == "POST":
             id = request.form['id']
@@ -359,7 +386,116 @@ def signups():
         return render_template('index.html', output="Not NGO name has been given")
     except Exception as e:
         return render_template('index.html', output="An Error Occured: {e}")
-        #return f"An Error Occured: {e}" 
+        
+##
+# The API endpoint allows the user to get the endpoint total defined  by id
+# API endpoint /signup?id=<id>
+##
+@app.route("/signups", methods=['GET'], endpoint='signups')
+def signup():    
+    try:
+        id = request.args.get('id')
+        counter = counter_ref.document(id).get()
+        output = counter.to_dict()['count']            
+        return jsonify({"unique_count": output, "id": id}), 200
+    except Exception as e:
+        return f"An Error Occured: {e}" 
+
+#
+# API Route add a counter by ID - requires json file body with id and count
+#
+@app.route("/allowedlistadd", methods=['GET'], endpoint='allowedlistadd')
+@login_is_required
+def allowedlistadd():
+    return render_template('allowedlistadd.html', **locals())
+ 
+#
+# API Route list all or a speific counter by ID - requires json file body with id and count
+#
+@app.route("/allowedlist", methods=['GET'], endpoint='allowedlist')
+@login_is_required
+def allowedlist():
+    try:
+        allowedlist = []     
+        for doc in allowedorigion_ref.stream():
+            don = doc.to_dict()
+            don["docid"] = doc.id
+            allowedlist.append(don)
+
+        return render_template('allowedlist.html', allowed=allowedlist)
+    except Exception as e:
+        return f"An Error Occured: {e}"
+    
+#
+# API Route add a counter by ID - requires json file body with id and count
+#
+@app.route("/allowedlistcreate", methods=['POST'], endpoint='allowedlistcreate')
+@login_is_required
+def allowedlistcreate():
+    try:
+        id = request.form.get('id')        
+        data = {
+            u'id': request.form.get('id'),
+            u'domain': request.form.get('domain')
+        }
+        
+        allowedorigion_ref.document(id).set(data)
+        flash('Data Succesfully Submitted')
+        return redirect(url_for('allowedlist'))
+    except Exception as e:
+        flash('An Error Occvured')
+        return f"An Error Occured: {e}"
+
+#
+# API Route Update a counter by ID - requires json file body with id and count
+# API endpoint /update?id=<id>&count=<count>
+#
+@app.route("/allowedlistupdate", methods=['POST', 'PUT'], endpoint='allowedlistupdate')
+@login_is_required
+def allowedlistupdate():
+    try:
+        id = request.form['id']
+        data = {
+            u'id': request.form.get('id'),
+            u'domain': request.form.get('domain')
+        }
+        allowedorigion_ref.document(id).update(data)
+        return redirect(url_for('allowedlist'))
+    except Exception as e:
+        return f"An Error Occured: {e}"    
+    
+#
+# API Route list all or a speific counter by ID - requires json file body with id and count
+#
+@app.route("/allowedlistedit", methods=['GET'], endpoint='allowedlistedit')
+@login_is_required
+def allowedlistedit():
+    try:
+        allowedlists = []
+        # Check if ID was passed to URL query
+        id = request.args.get('id')
+        allowedlist = allowedorigion_ref.document(id).get()
+        don = allowedlist.to_dict()
+        don["docid"] = allowedlist.id
+        allowedlists.append(don)
+        
+        return render_template('allowedlistedit.html', ngo=don)
+    except Exception as e:
+        return f"An Error Occured: {e}"
+        
+#
+# API Route Delete a counter by ID /delete?id=<id>
+# API Enfpoint /delete?id=<id>
+#
+@app.route("/allowedlistdelete", methods=['GET', 'DELETE'], endpoint='allowedlistdelete')
+def allowedlistdelete():
+    try:
+        # Check for ID in URL query
+        id = request.args.get('id')
+        allowedorigion_ref.document(id).delete()
+        return redirect(url_for('allowedlist'))
+    except Exception as e:
+        return f"An Error Occured: {e}"
 
 #
 # API Route Delete a counter by ID /delete?id=<id>
