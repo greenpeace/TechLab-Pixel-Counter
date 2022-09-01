@@ -19,6 +19,9 @@
             <li class="nav-item">
               <a class="nav-link components" href="#Components">With Javascript</a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link components" href="#test">How to Test</a>
+            </li>
         </ul>
      </nav>
     </div>
@@ -87,68 +90,85 @@
               </p>
     <pre>
       <code>
-      /* ******************************************* */
-      /* CUSTOM VARIABLES - CHANGE FOR YOUR CAMPAIGN */
-      /* ******************************************* */
-      
-      /* Set the Identifier for the Ticket HTML Element */
-      var tickerElementId = "#ticker";
-      
-      /* Set the campaign for the global petition counter */
-      var countername = "testcounter";
-      
-      
-      /* ***************************** */
-      /* START OF SCRIPT - DO NOT EDIT */
-      /* ***************************** */
-      
-      /* Get Petition Count */
-      var counterBaseUrl = 'https://pixelcounter.greenpeace.org/signup';
-      
-      $.ajax({
-        type: "GET",
-        url: counterBaseUrl + counteranme,
-        dataType: "json",
-        success: function(response) {
-          ticker(response.unique_count, tickerElementId);
-        }
-      });
-      
-      function numberWithCommas(x) {
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      }
-      
-      function ticker(n, identifier) {
-        /* Update the value */
-        $(identifier).text(n);
-        /* Perform animation */
-        $(identifier).each(function() {
-          $(this).prop('Counter', 0).animate({
-            Counter: $(this).text()
-          }, {
-            duration: 2000,
-            easing: 'swing',
-            step: function(now) {
-              $(this).text(Math.ceil(now));
-            },
-            /* Add comma */
-            complete: function() {
-              $(identifier).text(numberWithCommas(n));
+        /* ******************************************* */
+        /* CUSTOM VARIABLES - CHANGE FOR YOUR CAMPAIGN */
+        /* ******************************************* */
+        
+        /* Set the Identifier for the Ticket HTML Element */
+        var tickerElementId = "#ticker";
+        
+        /* Set the campaign for the global petition counter */
+        var countername = "testcounter";
+        
+        
+        /* ***************************** */
+        /* START OF SCRIPT - DO NOT EDIT */
+        /* ***************************** */
+        
+        /* Get Petition Count */
+        var counterBaseUrl = 'https://pixelcounter.greenpeace.org/signup';
+        
+        $.ajax({
+            type: "GET",
+            url: counterBaseUrl + counteranme,
+            dataType: "json",
+            success: function(response) {
+              ticker(response.unique_count, tickerElementId);
             }
           });
-        });
-      }
-    </code>
+          
+          function numberWithCommas(x) {
+            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+          
+        function ticker(n, identifier) {
+              /* Update the value */
+              $(identifier).text(n);
+              /* Perform animation */
+              $(identifier).each(function() {
+                $(this).prop('Counter', 0).animate({
+                  Counter: $(this).text()
+                }, {
+                  duration: 2000,
+                  easing: 'swing',
+                  step: function(now) {
+                    $(this).text(Math.ceil(now));
+                  },
+                  /* Add comma */
+                  complete: function() {
+                    $(identifier).text(numberWithCommas(n));
+                  }
+                });
+              });
+        } 
+      </code>
     </pre>
         
       </article>
     </section> 
-</main>
+
+    <section class="main-section" id="test">
+      <header-doc><h2>How to Test</h2></header-doc>
+       <article>
+          <h1>Counter tests</h1>
+          <ul>
+              <li><a class="nav-link" href="{{ url_for('testodometer') }}">Show counter (normal)</a></li>
+              <li><a class="nav-link" href="{{ url_for('testincrementiframe') }}">Show counter (iframe)</a></li>
+          </ul>
+          <p>Use only ONE of the methods below to increment the counter when there is a signature on your system.</p>
+          <ol>
+              <li><a class="nav-link" href="{{ url_for('testincrementiframe') }}">Increment the counter using iframe (pixel)</a></li>       
+              <li><a class="nav-link" href="{{ url_for('testincrementimage') }}">Increment the counter using an image (pixel)</a></li>
+              <li><a class="nav-link" href="{{ url_for('testincrementscript') }}">Increment the counter using Javascript code</a></li>
+          </ol>
+      </article>
+    </section> 
+  </main>
 </div>
 
     <iframe src="/count?id=testcounter&email_hash=0c7e6a405862e402eb76a70f8a26fc732d07c32931e9fae9ab1582911d2e8a3b" width="1" height="1" frameborder=0 style="overflow:hidden;" scrolling="no"></iframe>
 
-    <iframe src="/count?id=testcount" width="1" height="1" frameborder=0 style="overflow:hidden;" scrolling="no"></iframe>
+    <iframe src="/count?id=testcounter" width="1" height="1" frameborder=0 style="overflow:hidden;" scrolling="no"></iframe>
 
     {% include "footer.html" %}
     

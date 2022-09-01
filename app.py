@@ -5,7 +5,7 @@ import base64
 import werkzeug
 
 # Third-party libraries
-from flask import Flask, session, request, url_for, redirect, jsonify, render_template, abort, flash
+from flask import Flask, session, request, url_for, redirect, jsonify, render_template, abort, flash, send_file
 import pathlib
 import requests
 from pip._vendor import cachecontrol
@@ -73,8 +73,8 @@ flow = Flow.from_client_secrets_file(
             "openid"
             ],
     #and the redirect URI is the point where the user will end up after the authorization
-    #redirect_uri="http://127.0.0.1:8080/callback"
-    redirect_uri="https://pixelcounter.greenpeace.org/callback"   
+    redirect_uri="http://127.0.0.1:8080/callback"
+    #redirect_uri="https://pixelcounter.greenpeace.org/callback"   
 )
 
 # Initialize Firestore DB
@@ -212,6 +212,38 @@ def addlist():
 @login_is_required
 def documentation():
     return render_template('documentation.html', **locals())
+ 
+#
+# API Route add a counter by ID - requires json file body with id and count
+#
+@app.route("/testincrementiframe", methods=['GET'], endpoint='testincrementiframe')
+@login_is_required
+def testincrementiframe():
+    return render_template('test-display-iframe.html', **locals())
+
+#
+# API Route add a counter by ID - requires json file body with id and count
+#
+@app.route("/testincrementimage", methods=['GET'], endpoint='testincrementimage')
+@login_is_required
+def testincrementimage():
+    return render_template('test-increment-image.html', **locals())
+
+#
+# API Route add a counter by ID - requires json file body with id and count
+#
+@app.route("/testincrementscript", methods=['GET'], endpoint='testincrementscript')
+@login_is_required
+def testincrementscript():
+    return render_template('test-increment-script.html', **locals())
+
+#
+# API Route add a counter by ID - requires json file body with id and count
+#
+@app.route("/testodometer", methods=['GET'], endpoint='testodometer')
+@login_is_required
+def testodometer():
+    return render_template('test-odometer.html', **locals())
        
 #
 # API Route add a counter by ID - requires json file body with id and count
@@ -328,10 +360,64 @@ def updateform():
 @app.route("/counter", methods=['POST', 'PUT'])
 def counter():
     try:
-        id = request.json['id']
-        counter_ref.document(id).update({u'count': Increment(1)})
-        
-        return jsonify({"success": True}), 200
+        # Check if Remote Host is in the allowed list        
+        allowed_origin_list = []
+        for doc in allowedorigion_ref.stream():
+            allowed_origin_list.append(doc.to_dict()['domain'])
+        if 'REMOTE_HOST' in request.environ and request.environ['REMOTE_HOST'] in allowed_origin_list:
+            # On allowed lsut, check if ID was passed to URL query
+            email_hash = request.args.get('email_hash')
+            if email_hash is not None:
+                docRef = emailhash_ref.where('email_hash', '==', email_hash).get()
+                documents = [d for d in docRef]
+                # Check if hash value already exixsts in the database
+                if len(documents):
+                    # If exists, don not increase count by 1
+                    return base64.b64decode(b'='), 200
+                else:
+                    # Add hashed email to database
+                    data = {
+                        u'email_hash': email_hash,
+                    }
+                    emailhash_ref.document().set(data)
+            # Add Counter
+            id = request.args.get('id')  
+            counter_ref.document(id).update({u'count': Increment(1)})
+            counter_ref.document('totals').update({u'count': Increment(1)})
+#            return base64.b64decode(b'='), 200       
+            return jsonify({"success": True}), 200
+    except Exception as e:
+        return f"An Error Occured: {e}"
+
+@app.route('/count_pixel', methods=['GET'])
+def count_pixel():
+    try:
+        # Check if Remote Host is in the allowed list        
+        allowed_origin_list = []
+        for doc in allowedorigion_ref.stream():
+            allowed_origin_list.append(doc.to_dict()['domain'])
+        if 'REMOTE_HOST' in request.environ and request.environ['REMOTE_HOST'] in allowed_origin_list:
+            # On allowed lsut, check if ID was passed to URL query
+            email_hash = request.args.get('email_hash')
+            if email_hash is not None:
+                docRef = emailhash_ref.where('email_hash', '==', email_hash).get()
+                documents = [d for d in docRef]
+                # Check if hash value already exixsts in the database
+                if len(documents):
+                    # If exists, don not increase count by 1
+                    return base64.b64decode(b'='), 200
+                else:
+                    # Add hashed email to database
+                    data = {
+                        u'email_hash': email_hash,
+                    }
+                    emailhash_ref.document().set(data)
+            # Add Counter
+            id = request.args.get('id')  
+            counter_ref.document(id).update({u'count': Increment(1)})
+            counter_ref.document('totals').update({u'count': Increment(1)})
+            filename = 'ok.gif'
+            return send_file(filename, mimetype='image/gif')
     except Exception as e:
         return f"An Error Occured: {e}"
 
@@ -346,6 +432,7 @@ def count():
         allowed_origin_list = []
         for doc in allowedorigion_ref.stream():
             allowed_origin_list.append(doc.to_dict()['domain'])
+        print("Remot Host Address: ", request.environ['REMOTE_HOST'])
         if 'REMOTE_HOST' in request.environ and request.environ['REMOTE_HOST'] in allowed_origin_list:
             # On allowed lsut, check if ID was passed to URL query
             email_hash = request.args.get('email_hash')
@@ -392,11 +479,11 @@ def signup():
 # API endpoint /signup?id=<id>
 ##
 @app.route("/signups", methods=['GET'], endpoint='signups')
-def signup():    
+def signups():    
     try:
         id = request.args.get('id')
         counter = counter_ref.document(id).get()
-        output = counter.to_dict()['count']            
+        output = counter.to_dict()['count']          
         return jsonify({"unique_count": output, "id": id}), 200
     except Exception as e:
         return f"An Error Occured: {e}" 

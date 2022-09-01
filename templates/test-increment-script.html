@@ -1,0 +1,15 @@
+{% include "header.html" %}
+
+
+    <h1>The counter has been incremented by running javascript</h1>
+    <script>
+        {
+            const container = document.getElementsByTagName("body")[0];
+            const conversion = document.createElement("img");
+            conversion.src = "/signup";
+            container.appendChild(conversion);
+        }
+    </script>
+
+
+{% include "footer.html" %}
