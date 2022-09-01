@@ -1,5 +1,5 @@
 # Dockerfile
-FROM python:3.9-slim
+FROM python:3.10-slim
 RUN apt-get update -y
 RUN apt-get install -y python3-pip python-dev build-essential
 
