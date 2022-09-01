@@ -17,7 +17,7 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-green">
-      <a class="navbar-brand" href="{{ url_for('main') }}"><img src="{{ url_for('static', filename='images/greenpeace-163x50.png') }}"></a>
+      <a class="navbar-brand" href="{{ url_for('pixelcounterblue.main') }}"><img src="{{ url_for('static', filename='images/greenpeace-163x50.png') }}"></a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -25,16 +25,16 @@
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
-            <a class="nav-link" href="{{ url_for('read') }}">Pixelcounters</a>
+            <a class="nav-link" href="{{ url_for('pixelcounterblue.read') }}">Pixelcounters</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('allowedlist') }}">Settings</a>
+            <a class="nav-link" href="{{ url_for('pixelcounterblue.allowedlist') }}">Settings</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('documentation') }}">Documentation</a>
+            <a class="nav-link" href="{{ url_for('pixelcounterblue.documentation') }}">Documentation</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+            <a class="nav-link" href="{{ url_for('authsblue.logout') }}">Logout</a>
           </li>
         </ul>
       </div>

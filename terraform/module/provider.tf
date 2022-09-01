@@ -2,9 +2,5 @@
 provider "google" {
   project     = var.project_id
   region      = var.gcp_region
-#  credentials = local.creds_json_file
+#  credentials = file("access.json")
 }
-
-#provider "google-beta" {
-#  credentials = local.creds_json_file
-#}

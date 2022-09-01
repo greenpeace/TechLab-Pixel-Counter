@@ -29,6 +29,71 @@ module "example" {
   source = "./module/"
 }
 
+locals {
+  services = [
+    "sourcerepo.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "run.googleapis.com",
+    "iam.googleapis.com",
+  ]
+}
+
+resource "google_project_service" "enabled_service" {
+  for_each = toset(local.services)
+  project  = var.project_id
+  service  = each.key
+  provisioner "local-exec" {
+    command = "sleep 60"
+  }
+  provisioner "local-exec" {
+    when    = destroy
+    command = "sleep 15"
+  }
+}
+
+resource "google_sourcerepo_repository" "repo" {
+  depends_on = [
+    google_project_service.enabled_service["sourcerepo.googleapis.com"]
+  ]
+  name       = "${var.namespace}-repo"
+}
+
+resource "google_cloudbuild_trigger" "trigger" {
+  depends_on = [
+    google_project_service.enabled_service["cloudbuild.googleapis.com"]
+  ]
+trigger_template {
+    branch_name = "master"
+    repo_name   = google_sourcerepo_repository.repo.name
+  }
+build {
+    step {
+      name = "gcr.io/cloud-builders/go"
+      args = ["test"]
+      env  = ["PROJECT_ROOT=${var.namespace}"]
+    }
+step {
+      name = "gcr.io/cloud-builders/docker"
+      args = ["buildx", "build", "--platform linux/amd64", "--push", "-t", local.image, "."]
+    }
+
+step {
+      name = "gcr.io/cloud-builders/gcloud"
+      args = ["run", "deploy", google_cloud_run_service.service.name, "--image", local.image, "--region", var.region, "--platform", "managed", "-q"]
+    }
+  }
+}
+
+data "google_project" "project" {}
+
+resource "google_project_iam_member" "cloudbuild_roles" {
+  depends_on = [google_cloudbuild_trigger.trigger]
+  for_each   = toset(["roles/run.admin", "roles/iam.serviceAccountUser"])
+  project    = var.project_id
+  role       = each.key
+  member     = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
 #data "google_project" "working_project" {
 #  project_id = var.Greenpeace_Environment == "prod" ? "global-it-operations" : "global-it-operations-test"
 #}
