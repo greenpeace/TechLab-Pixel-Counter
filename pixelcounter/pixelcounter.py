@@ -267,7 +267,7 @@ def count_pixel():
             id = request.args.get('id')  
             counter_ref.document(id).update({u'count': Increment(1)})
             counter_ref.document('totals').update({u'count': Increment(1)})
-            filename = 'ok.gif'
+            filename = 'static/images/onepixel.gif'
             return send_file(filename, mimetype='image/gif')
     except Exception as e:
         return f"An Error Occured: {e}"
@@ -329,8 +329,8 @@ def signup():
 # The API endpoint allows the user to get the endpoint total defined  by id
 # API endpoint /signup?id=<id>
 ##
-@pixelcounterblue.route("/signups", methods=['GET'], endpoint='signups')
-def signups():    
+@pixelcounterblue.route("/signups", methods=['POST','GET'], endpoint='signups')
+def signups():
     try:
         id = request.args.get('id')
         counter = counter_ref.document(id).get()

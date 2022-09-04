@@ -1,33 +1,3 @@
-# main.tf
-terraform {
-  required_version = ">= 0.14"
-  required_providers {
-      google = {
-        source  = "hashicorp/google"
-        version = "4.34.0"
-      }
-
-      google-beta = {
-        source  = "hashicorp/google-beta"
-        version = "4.34.0"
-      }
-  }
-    backend "gcs" {
-      bucket = "msw-terraform-state"
-      # Structure:
-      # state/<application/<entity>/<environment>/
-      prefix = "state/makesmthngwebsite/test/"
-      # This configuration expects GOOGLE_CREDENTIALS to be avalible
-      #credentials = "${file("${var.Service_Accounts_Dir}/sa_tfst_bucket_key.json")}"
-      #bucket = "${TERRAFORM_STATE_BUCKET_NAME}"
-      #prefix = "${TERRAFORM_STATE_BUCKET_DIR}"
-    }
-}
-
-# Read the modules
-module "example" {
-  source = "./module/"
-}
 
 locals {
   services = [
@@ -42,83 +12,106 @@ resource "google_project_service" "enabled_service" {
   for_each = toset(local.services)
   project  = var.project_id
   service  = each.key
+
   provisioner "local-exec" {
     command = "sleep 60"
   }
+
   provisioner "local-exec" {
     when    = destroy
     command = "sleep 15"
   }
 }
 
-resource "google_sourcerepo_repository" "repo" {
+locals {
+  image = "eu.gcr.io/${var.project_id}/${var.namespace}:v4"
+}
+
+resource "null_resource" "docker_build" {
+
+triggers = {
+always_run = timestamp()
+
+}
+
+provisioner "local-exec" {
+  working_dir = path.module
+  command     = "docker buildx build --platform linux/amd64 --push -t ${local.image} ../."
+}
+}
+
+# Deploy image to Cloud Run
+resource "google_cloud_run_service" "service" {
   depends_on = [
-    google_project_service.enabled_service["sourcerepo.googleapis.com"]
+    google_project_service.enabled_service["run.googleapis.com"]
   ]
-  name       = "${var.namespace}-repo"
-}
 
-resource "google_cloudbuild_trigger" "trigger" {
-  depends_on = [
-    google_project_service.enabled_service["cloudbuild.googleapis.com"]
-  ]
-trigger_template {
-    branch_name = "master"
-    repo_name   = google_sourcerepo_repository.repo.name
+  name     = "pixelcounter"
+  location = var.gcp_region
+  autogenerate_revision_name = true
+
+  template {
+    spec {
+      containers {
+        image = local.image
+        ports {
+          container_port = 8080
+        }
+      }
+    }
   }
-build {
-    step {
-      name = "gcr.io/cloud-builders/go"
-      args = ["test"]
-      env  = ["PROJECT_ROOT=${var.namespace}"]
-    }
-step {
-      name = "gcr.io/cloud-builders/docker"
-      args = ["buildx", "build", "--platform linux/amd64", "--push", "-t", local.image, "."]
-    }
-
-step {
-      name = "gcr.io/cloud-builders/gcloud"
-      args = ["run", "deploy", google_cloud_run_service.service.name, "--image", local.image, "--region", var.region, "--platform", "managed", "-q"]
-    }
+  traffic {
+    percent         = 100
+    latest_revision = true
   }
 }
 
-data "google_project" "project" {}
-
-resource "google_project_iam_member" "cloudbuild_roles" {
-  depends_on = [google_cloudbuild_trigger.trigger]
-  for_each   = toset(["roles/run.admin", "roles/iam.serviceAccountUser"])
-  project    = var.project_id
-  role       = each.key
-  member     = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+# Create public access
+data "google_iam_policy" "all_users_policy" {
+  binding {
+    role    = "roles/run.invoker"
+    members = ["allUsers"]
+  }
 }
 
-#data "google_project" "working_project" {
-#  project_id = var.Greenpeace_Environment == "prod" ? "global-it-operations" : "global-it-operations-test"
-#}
+# Enable public access on Cloud Run service
+resource "google_cloud_run_service_iam_policy" "all_users_iam_policy" {
+  location    = google_cloud_run_service.service.location
+  project     = google_cloud_run_service.service.project
+  service     = google_cloud_run_service.service.name
+  policy_data = data.google_iam_policy.all_users_policy.policy_data
+}
 
-#locals {
-#  creds_json_file = file("${var.Service_Accounts_Dir}/${var.Greenpeace_Environment}_terraform-deploy_key.json")
-#}
+# SECRETS
+locals {
+  app_name = "pixelcounter"
+}
 
-#locals {
-#  project_id = var.Greenpeace_Environment == "prod" ? "global-iac-terraform" : "test-global-iac-terraform"
-#}
+resource "google_secret_manager_secret" "pixelcounter" {
+  project   = var.project_id
+  secret_id = "pixelcounter_token"
 
-#locals {
-#  release_id_raw = lower(replace(var.label_release_id, ".", "-"))
-#  labels = {
-#    name              = lower(var.label_name) # name should be the hostname of the VM resource but if it is not defined pull in a default value.
-#    service_name      = lower(var.label_service_name)
-#    service_component = lower(var.label_service_component)
-#    service_owner     = lower(var.label_service_owner)
-#    business_contact  = lower(var.label_business_contact)
-#    budget_code       = lower(var.label_budget_code)
-#    tech_contact      = lower(var.label_tech_contact)
-#    release_id        = substr("${local.release_id_raw}", 0, min(length("${local.release_id_raw}"), 62))
-#  }
-#}
+  replication {
+    user_managed {
+      replicas {
+        location = "europe-west1"
+      }
+      replicas {
+        location = "europe-north1"
+      }
+    }
+  }
 
+  labels = {
+    app         = local.app_name
+    entity      = var.entity
+    environment = var.environment
+    source      = "pixel_token"
+  }
+}
 
-
+resource "google_service_account" "function" {
+  account_id   = "${local.app_name}-${var.entity}-${var.environment}"
+  display_name = "Pixelcounter Service Account"
+  project      = var.project_id
+}

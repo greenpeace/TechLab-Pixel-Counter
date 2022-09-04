@@ -1,7 +1,73 @@
 {% include "header.html" %}
 
+<main role="main">
+    <div class="container">
+        <div class="row top-buffer">
+            <h1>The counter has been incremented loading a 1 pixel image</h1>
+            <img src="/count_pixel?id=testcounter" alt="" />
+        </div>
+        <p>This is how you create the &lt;image&gt; counter</p>
+<pre>
+    <code>
+        &lt;img src="https://pixelcounter.greenpeace.org/count_pixel?id=testcounter" alt="" /&gt;
+    </code>
+</pre>
+    </div>
+</main>
 
-    <h1>The counter has been incremented loading a 1 pixel image</h1>
-    <img src="https://pixelcounter.greenpeace.org/count_pixel" alt="" />
 
+<script>
+    /* ******************************************* */
+    /* CUSTOM VARIABLES - CHANGE FOR YOUR CAMPAIGN */
+    /* ******************************************* */
+
+    /* Set the Identifier for the Ticket HTML Element */
+    var tickerElementId = "#ticker";
+
+    /* Set the campaign for the global petition counter */
+    var countername = "testcounter";
+
+
+    /* ***************************** */
+    /* START OF SCRIPT - DO NOT EDIT */
+    /* ***************************** */
+
+    /* Get Petition Count */
+    var counterBaseUrl = "/signup";
+
+    $.ajax({
+        type: "GET",
+        url: counterBaseUrl + "?id=" + counteranme,
+        dataType: "json",
+        success: function(response) {
+        ticker(response.unique_count, tickerElementId);
+        }
+    });
+    
+    function numberWithCommas(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    
+    function ticker(n, identifier) {
+        /* Update the value */
+        $(identifier).text(n);
+        /* Perform animation */
+        $(identifier).each(function() {
+            $(this).prop('Counter', 0).animate({
+            Counter: $(this).text()
+            }, {
+            duration: 2000,
+            easing: 'swing',
+            step: function(now) {
+                $(this).text(Math.ceil(now));
+            },
+            /* Add comma */
+            complete: function() {
+                $(identifier).text(numberWithCommas(n));
+            }
+            });
+        });
+    } 
+</script>
+<hr>
 {% include "footer.html" %}

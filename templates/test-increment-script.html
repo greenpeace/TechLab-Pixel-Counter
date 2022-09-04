@@ -1,15 +1,35 @@
 {% include "header.html" %}
 
+<main role="main">
+    <div class="container">
+        <div class="row top-buffer">
+            <img></img>
+            <h1>The counter has been incremented by running javascript</h1>
+            <script>
+                {
+                    const container = document.getElementsByTagName("body")[0];
+                    const conversion = document.createElement("img");
+                    conversion.src = "https://pixelcounter.greenpeace.org/count_pixel?id=testcounter";
+                    container.appendChild(conversion);
+                }
+            </script>
 
-    <h1>The counter has been incremented by running javascript</h1>
-    <script>
-        {
-            const container = document.getElementsByTagName("body")[0];
-            const conversion = document.createElement("img");
-            conversion.src = "/signup";
-            container.appendChild(conversion);
-        }
-    </script>
-
-
+            <hr>
+            <p>This is how you increment the counter with javascript</p>
+            <pre>
+                <code>
+                    &lt;script&gt;
+                        {
+                            const container = document.getElementsByTagName("body")[0];
+                            const conversion = document.createElement("img");
+                            conversion.src = "/count_pixel?id=testcounter";
+                            container.appendChild(conversion);
+                        }
+                    &lt;script&gt;
+                </code>
+            </pre>
+        </div>
+    </div>
+</main>
+<hr>
 {% include "footer.html" %}

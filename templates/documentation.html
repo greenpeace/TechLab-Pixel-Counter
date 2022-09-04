@@ -110,7 +110,7 @@
         
         $.ajax({
             type: "GET",
-            url: counterBaseUrl + counteranme,
+            url: counterBaseUrl + ?id=counteranme,
             dataType: "json",
             success: function(response) {
               ticker(response.unique_count, tickerElementId);

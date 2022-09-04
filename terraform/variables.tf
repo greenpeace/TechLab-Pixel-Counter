@@ -1,6 +1,6 @@
 variable "entity" {
   type = string
-  default = "pixelcount"
+  default = "pixelcounter"
 }
 variable "environment" {
   type = string
@@ -12,11 +12,16 @@ variable "gcp_region" {
 }
 variable "image_name" {
   type = string
-  default = "pixelcount"
+  default = "pixelcounter"
 }
 variable "project_id" {
   type = string
   default = "make-smthng-website"
+}
+
+variable "namespace" {
+  type        = string
+  default     = "pipeline"
 }
 
 ############### Standard Greenpeace Used Varibles #############################

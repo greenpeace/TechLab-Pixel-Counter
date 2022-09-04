@@ -5,7 +5,7 @@ import werkzeug
 from werkzeug.exceptions import abort
 
 # Third-party libraries
-from flask import Flask, request, render_template
+from flask import Flask, render_template
 
 # Internal imports
 from system.getsecret import getsecrets
@@ -23,9 +23,6 @@ from system.setenv import project_id
 
 # Get the secret for Service Account
 app_secret_key = getsecrets("app_secret_key",project_id)
-
-# Install Google Libraries
-import google.cloud.logging
 
 # Create the Flask application error handlers
 def page_not_found(e):
