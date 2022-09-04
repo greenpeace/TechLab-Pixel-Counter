@@ -31,7 +31,7 @@
             $.ajax({
                 url: "https://pixelcounter.greenpeace.org/signups?id=testcounter",
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    'Content-Type': 'application/json'
                 },
                 type: "POST", /* or type:"GET" or type:"PUT" */
                 dataType: "json",
@@ -52,7 +52,7 @@
                     console.log("Error getting the number of signups");
                 },
                 timeout: 6000 // sets timeout to 6 seconds            
-            });
+                });
         });
     </script>
         <p>This is how you create the odometer counter</p>
@@ -85,20 +85,32 @@
                 /* jshint browser: true, esversion: 6 */
                 /* global Odometer, odometer, jQuery, analytics, console */
                 document.addEventListener("DOMContentLoaded", function() {
-                    jQuery.ajax({
-                        url: "https://pixelcounter.greenpeace.org/signups?id=testcounter"
-                    }).done(function( data ) {
-                        const counterValue = Number(data.unique_count);
-                        const el = document.querySelector('.odometer2');
-                        const odometer = new Odometer({
-                            el: el,
-                            format: '.ddd.ddd',
-                            value: counterValue - Math.round( counterValue / 10 ),
-                            duration: 2000,
+                    $.ajax({
+                        url: "https://pixelcounter.greenpeace.org/signups?id=testcounter",
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        type: "POST", /* or type:"GET" or type:"PUT" */
+                        dataType: "json",
+                        data: {
+                        },
+                        success: function(data){
+                            const counterValue = Number(data.unique_count);
+                            const el = document.querySelector('.odometer2');
+                            const odometer = new Odometer({
+                                el: el,
+                                format: '.ddd.ddd',
+                                value: counterValue - Math.round( counterValue / 10 ),
+                                duration: 2000,
+                            });
+                            odometer.update(counterValue);
+                        },
+                        error: function(){
+                            console.log("Error getting the number of signups");
+                        },
+                        timeout: 6000 // sets timeout to 6 seconds            
                         });
-                        odometer.update(counterValue);
-                    });
-                });
+                });        
                 &lt;/script&gt;
         </code>
         </pre>

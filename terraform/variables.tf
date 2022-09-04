@@ -19,11 +19,6 @@ variable "project_id" {
   default = "make-smthng-website"
 }
 
-variable "namespace" {
-  type        = string
-  default     = "pipeline"
-}
-
 ############### Standard Greenpeace Used Varibles #############################
 ###############################################################################
 #variable "Greenpeace_Environment" {

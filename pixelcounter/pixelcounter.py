@@ -334,8 +334,10 @@ def signups():
     try:
         id = request.args.get('id')
         counter = counter_ref.document(id).get()
-        output = counter.to_dict()['count']          
-        return jsonify({"unique_count": output, "id": id}), 200
+        output = counter.to_dict()['count']
+        response = jsonify({"unique_count": output, "id": id})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 200
     except Exception as e:
         return f"An Error Occured: {e}" 
 
