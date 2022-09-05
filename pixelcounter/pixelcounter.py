@@ -1,16 +1,21 @@
 import base64
 # Get the Flask Files Required
 from flask import Blueprint, g, request, send_file, jsonify, url_for, redirect, render_template, flash
+from flask_cors import CORS,cross_origin
 # Install Google Libraries
 from google.cloud.firestore import Increment
 # Journalist firestore collection
 from system.firstoredb import counter_ref
 from system.firstoredb import allowedorigion_ref
 from system.firstoredb import emailhash_ref
+# Import logging
+import logging
 
 pixelcounterblue = Blueprint('pixelcounterblue', __name__)
 
 from auth.auth import login_is_required
+
+CORS(pixelcounterblue)
 
 @pixelcounterblue.route("/main", endpoint='main')
 @login_is_required
@@ -209,6 +214,7 @@ def updateform():
 # json {"id":"GP Canada","count", 0}
 #
 @pixelcounterblue.route("/counter", methods=['POST', 'PUT'])
+@cross_origin()
 def counter():
     try:
         # Check if Remote Host is in the allowed list        
@@ -240,7 +246,8 @@ def counter():
     except Exception as e:
         return f"An Error Occured: {e}"
 
-@pixelcounterblue.route('/count_pixel', methods=['GET'])
+@pixelcounterblue.route('/count_pixel', methods=['GET','POST',])
+@cross_origin()
 def count_pixel():
     try:
         # Check if Remote Host is in the allowed list        
@@ -276,7 +283,8 @@ def count_pixel():
 # The count route used for pixel image to increase a count using a GET request
 # API endpoint /count?id=<id>
 ##
-@pixelcounterblue.route("/count", methods=['GET'])
+@pixelcounterblue.route("/count", methods=['GET', 'POST',])
+@cross_origin()
 def count():
     try:
         # Check if Remote Host is in the allowed list        
@@ -330,14 +338,13 @@ def signup():
 # API endpoint /signup?id=<id>
 ##
 @pixelcounterblue.route("/signups", methods=['POST','GET'], endpoint='signups')
+@cross_origin()
 def signups():
     try:
         id = request.args.get('id')
         counter = counter_ref.document(id).get()
         output = counter.to_dict()['count']
-        response = jsonify({"unique_count": output, "id": id})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 200
+        return jsonify({"unique_count": output, "id": id}), 200
     except Exception as e:
         return f"An Error Occured: {e}" 
 

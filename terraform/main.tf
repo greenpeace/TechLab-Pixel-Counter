@@ -24,7 +24,7 @@ resource "google_project_service" "enabled_service" {
 }
 
 locals {
-  image = "eu.gcr.io/${var.project_id}/${var.image_name}:v5"
+  image = "eu.gcr.io/${var.project_id}/${var.image_name}:v6"
 }
 
 resource "null_resource" "docker_build" {
@@ -35,9 +35,9 @@ always_run = timestamp()
 }
 
 provisioner "local-exec" {
-  working_dir = path.module
-  command     = "docker buildx build --platform linux/amd64 --push -t ${local.image} ../."
-}
+    working_dir = path.module
+    command     = "docker buildx build --platform linux/amd64 --push -t ${local.image} ../."
+  }
 }
 
 # Deploy image to Cloud Run
