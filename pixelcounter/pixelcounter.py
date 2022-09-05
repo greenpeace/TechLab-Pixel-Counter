@@ -123,8 +123,8 @@ def createlist():
         flash('Data Succesfully Submitted')
         return redirect(url_for('pixelcounterblue.read'))
     except Exception as e:
-        flash('An Error Occvured')
-        return f"An Error Occured: {e}"
+        flash('An Error Occvured', {e})
+        return redirect(url_for('pixelcounterblue.addlist'))
 #
 # API Route list all or a speific counter by ID - requires json file body with id and count
 #
@@ -154,7 +154,6 @@ def listedit():
         counter_id = request.args.get('id')
         counter = counter_ref.document(counter_id).get()
         return render_template('listedit.html', ngo=counter.to_dict())
-#            return jsonify(u'{}'.format(counter.to_dict()['count'])), 200
     except Exception as e:
         return f"An Error Occured: {e}"
     
@@ -206,7 +205,9 @@ def updateform():
         counter_ref.document(id).update(data)
         return redirect(url_for('pixelcounterblue.read'))
     except Exception as e:
-        return f"An Error Occured: {e}"
+        flash(f"An Error Occured: {e}")
+        return redirect(url_for('pixelcounterblue.listedit'))
+
 
 #
 # API Route Increase Counter by ID - requires json file body with id and count

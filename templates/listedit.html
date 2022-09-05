@@ -11,35 +11,27 @@
             </div>
         </div>
       </div>
-    
+      <hr>
       <div class="container-fluid">
+            <p>Counter Name: {{ ngo.id }}</p>        
             <form action="/updateform" method="post">
-              <hr>
-              <div class="form-group">
-                <label for="id">Counter Name</label>  
-                <input type="text" name="id" class="form-control" value="{{ ngo.id }}"></input>
-              </div>
-              <hr>
+              <input type="hidden" name="id" value="{{ ngo.id }}">
               <div class="form-group">
                 <label for="nro">NRO</label>  
                 <input type="text" name="nro" class="form-control" value="{{ ngo.nro }}"></input>
               </div>
-                <hr>
               <div class="form-group">
                 <label for="count">Count</label>  
                 <input type="number" class="form-control" name="count" value="{{ ngo.count }}"></input>
               </div> 
-                <hr>
               <div class="form-group">
                 <label for="url">URL</label>
                 <input type="url" class="form-control" name="url" value="{{ ngo.url }}"></input>
               </div>
-                <hr>
               <div class="form-group">
                 <label for="contactpoint">Contact</label>
                 <input type="text" class="form-control" name="contactpoint" value="{{ ngo.contactpoint }}"></input>
               </div>
-              <hr>
               <div class="form-group">
                 <label for="campaign">Campaign</label>
                 <input type="text" class="form-control" name="campaign" value="{{ ngo.campaign }}"></input>

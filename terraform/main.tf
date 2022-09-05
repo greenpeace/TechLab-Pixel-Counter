@@ -24,7 +24,7 @@ resource "google_project_service" "enabled_service" {
 }
 
 locals {
-  image = "eu.gcr.io/${var.project_id}/${var.image_name}:v6"
+  image = "eu.gcr.io/${var.project_id}/${var.image_name}:v6.1"
 }
 
 resource "null_resource" "docker_build" {
