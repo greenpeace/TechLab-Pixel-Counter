@@ -24,7 +24,7 @@ resource "google_project_service" "enabled_service" {
 }
 
 locals {
-  image = "eu.gcr.io/${var.project_id}/${var.image_name}:v6.1"
+  image = "eu.gcr.io/${var.project_id}/${var.image_name}:latest"
 }
 
 resource "null_resource" "docker_build" {
@@ -40,15 +40,22 @@ provisioner "local-exec" {
   }
 }
 
+resource "google_project_service" "cloud_run" {
+  service = "iam.googleapis.com"
+  disable_dependent_services = true
+  disable_on_destroy = false
+}
+
 # Deploy image to Cloud Run
 resource "google_cloud_run_service" "service" {
-  depends_on = [
-    google_project_service.enabled_service["run.googleapis.com"]
+    depends_on = [
+    google_project_service.enabled_service["run.googleapis.com"],
+    google_project_service.cloud_run
   ]
 
   name     = "pixelcounter"
   location = var.gcp_region
-  autogenerate_revision_name = true
+  #autogenerate_revision_name = true
 
   template {
     spec {
