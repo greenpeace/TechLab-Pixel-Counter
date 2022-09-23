@@ -1,13 +1,4 @@
 
-locals {
-  services = [
-    "sourcerepo.googleapis.com",
-    "cloudbuild.googleapis.com",
-    "run.googleapis.com",
-    "iam.googleapis.com",
-  ]
-}
-
 resource "google_project_service" "enabled_service" {
   for_each = toset(local.services)
   project  = var.project_id
@@ -21,10 +12,6 @@ resource "google_project_service" "enabled_service" {
     when    = destroy
     command = "sleep 15"
   }
-}
-
-locals {
-  image = "eu.gcr.io/${var.project_id}/${var.image_name}:latest"
 }
 
 resource "null_resource" "docker_build" {
@@ -82,7 +69,7 @@ data "google_iam_policy" "all_users_policy" {
 }
 
 # Enable public access on Cloud Run service
-resource "google_cloud_run_service_iam_policy" "all_users_iam_policy" {
+resource "google_cloud_run_service_iam_policy" "all_users_policy" {
   location    = google_cloud_run_service.service.location
   project     = google_cloud_run_service.service.project
   service     = google_cloud_run_service.service.name
@@ -90,10 +77,6 @@ resource "google_cloud_run_service_iam_policy" "all_users_iam_policy" {
 }
 
 # SECRETS
-locals {
-  app_name = "pixelcounter"
-}
-
 resource "google_secret_manager_secret" "pixelcounter" {
   project   = var.project_id
   secret_id = "pixelcounter_token"
